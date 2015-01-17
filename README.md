@@ -21,6 +21,7 @@ The `qhue` module has a Resource class, which represents something that has a UR
 If you have a Resource, you can check its URL:
 
     # Connect to bridge with userid
+    from qhue import Bridge
     b = Bridge("192.168.0.45", 'newdeveloper')
     print b.url   # Just to see what's happening
 
