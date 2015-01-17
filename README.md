@@ -18,26 +18,35 @@ The `qhue` module has a Resource class, which represents something that has a UR
 
 ## Examples
 
-If you have a Resource, you can check its URL:
+Note: These examples assume you know the IP address of your bridge.  See [the 'Getting Started' section of the API docs](http://www.developers.meethue.com/documentation/getting-started) if you need help in finding it.  I've assigned mine a static address of 192.168.0.45, so that's what you'll see below.
 
-    # Connect to bridge with userid
+They also assume you have experimented with the API before, and so have a 'newdeveloper' user account set up on the bridge.  If not, see the section below entitled 'Creating a user'. 
+
+OK.  If you have a Resource, you can check its URL. A Bridge is an example of a Resource, so let's try that:
+
+    # Connect to the bridge with a particular username
     from qhue import Bridge
     b = Bridge("192.168.0.45", 'newdeveloper')
-    print b.url   # Just to see what's happening
 
-By getting an attribute of a Resource, you construct a new resource with the attribute name added to the URL:
+    # This should give you something familiar from the API docs:
+    print b.url 
+
+By requesting most other attributes of a Resource, you will construct a new Resource with the attribute name added to the URL:
 
     lights = b.lights
     print lights.url    # Should have '/lights' on the end
+
+These are, at this stage, simply references to entities on the bridge. To make an actual API call to the bridge, we simply call the resource as if it were a function:
+
     # Let's actually call the API and print the results
     print lights()  
 
-Qhue takes the JSON that's returned and turns it back into Python objects, typically a dictionary:
+Qhue takes the JSON that's returned and turns it back into Python objects, typically a dictionary, so you can access its parts easily:
 
     # Get the config info and print the ethernet MAC address
     print b.config()['mac']
 
-We'd like to be able to contruct all our URLs the same way, but you can't use numbers as attribute names, so we can't write, say, `b.lights.1`.  As an alternative, you can use dictionary key syntax:
+Ideally, we'd like to be able to construct all of our URLs the same way, but you can't use numbers as attribute names, so we can't write, say, `b.lights.1`.  As an alternative, you can use dictionary key syntax:
 
     # Get information about light 1
     print b.lights[1]()
@@ -49,33 +58,59 @@ Alternatively, when you call a resource, you can give it arguments, which will b
 
 To make a change to a value, you use a keyword argument.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
 
-    # These are all equivalent:
     b.lights[1].state(bri=128, hue=9000)
+
+and you can mix URL-constructing positional arguments with value-setting keyword arguments, if you like:
+
+    # These are equivalent to the previous example:
+
     b.lights(1, 'state', bri=128, hue=9000)
     b('lights', 1, 'state', bri=128, hue=9000)
 
-This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET.  If you do, it will be a PUT.  Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
+This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET.  If you do, it will be a PUT.  
+
+Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
 
     # Delete rule 1
     b('rules', 1, http_method='delete')
 
-And, at present, that's about it.  How's that for approx 50 lines of code?
+And, at present, that's about it.  How's that for approximately 50 lines of code?
 
 
-# Prerequisites
+## Creating a user
 
-This works under Python 2.  It may work under Python 3.  It uses Kenneth Reitz's excellent [requests](http://docs.python-requests.org/en/latest/), so you'll need to:
+If you haven't used the API before, you'll need to create a user account on the bridge.
+
+    from qhue import Bridge
+    b = Bridge("192.168.0.45")  # No username yet
+    b(devicetype="test user", username="newdeveloper", http_method="post")
+
+You'll get an error back saying that the link button on the bridge needs to be pressed.  Go and press it, and then run the command again:
+
+    b(devicetype="test user", username="newdeveloper", http_method="post")
+
+This should succeed, and you can now get a new Bridge object as shown in the examples above, passing this username as the second argument.
+
+
+## Prerequisites
+
+This works under Python 2.  It may work under Python 3.  It uses Kenneth Reitz's excellent [requests](http://docs.python-requests.org/en/latest/) module, so you'll need to do:
 
     pip install requests
 
-or similar before using Qhue.
+or something similar before using Qhue.
 
 
-# Licence
+## Licence
 
 This little snippet is distributed under the GPL v2. See the LICENSE file. (They spell it that way on the other side of the pond.)
 
-# Contributing
+## Contributing
 
-Suggestions, patches, pull requests welcome.  There are many ways this could be improved.  If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
+Suggestions, patches, pull requests welcome.  There are many ways this could be improved.  
+
+If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
+
+[Quentin Stafford-Fraser](http://quentinsf.com)
+
 
