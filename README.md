@@ -2,7 +2,7 @@
 
 Qhue (pronounced 'Q') is an exceedingly thin Python wrapper for the Philips Hue API.
 
-I wrote it because some of the other (excellent) frameworks out there weren't quite keeping up with developments in the API.  Because Qhue encodes almost none of the underlying models - it's really just a way of constructing URLs and HTTP calls - it should inherit any new features automatically.
+I wrote it because some of the other (excellent) frameworks out there weren't quite keeping up with developments in the API.  Because Qhue encodes almost none of the underlying models - it's really just a way of constructing URLs and HTTP calls - it should inherit any new features automatically.  The aim of Qhue is not to create another Python API for the Hue system, so much as to turn the existing API *into* Python, with minimal interference.
 
 ## Understanding Qhue
 
@@ -103,7 +103,8 @@ or something similar before using Qhue.
 
 ## Licence
 
-This little snippet is distributed under the GPL v2. See the LICENSE file. (They spell it that way on the other side of the pond.)
+This little snippet is distributed under the GPL v2. See the LICENSE file. (They spell it that way on the other side of the pond.) It comes with no warranties, express or implied, but just with the hope that it may be useful to someone.
+
 
 ## Contributing
 
