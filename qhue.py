@@ -35,10 +35,9 @@ class Resource(object):
         return resp
         
     def __getattr__(self, name):
-        return Resource(self.url + "/" + name)
+        return Resource(self.url + "/" + str(name))
 
-    def __getitem__(self, key):
-        return Resource(self.url + "/" + str(key))
+    __getitem__ = __getattr__
     
 
 class Bridge(Resource):
