@@ -8,8 +8,9 @@ class QhueException(Exception):
     pass
 
 class Resource(object):
-    def __init__(self, url):
+    def __init__(self, url, timeout=5):
         self.url = url
+        self.timeout = timeout
 
     def __call__(self, *args, **kwargs):
         url = self.url
@@ -18,13 +19,13 @@ class Resource(object):
         http_method = kwargs.pop('http_method',
             'get' if not kwargs else 'put').lower()
         if http_method == 'put':
-            r = requests.put(url, data=json.dumps(kwargs))
+            r = requests.put(url, data=json.dumps(kwargs), timeout=self.timeout)
         elif http_method == 'post':
-            r = requests.post(url, data=json.dumps(kwargs))
+            r = requests.post(url, data=json.dumps(kwargs), timeout=self.timeout)
         elif http_method == 'delete':
-            r = requests.delete(url)
+            r = requests.delete(url, timeout=self.timeout)
         else:
-            r = requests.get(url)
+            r = requests.get(url, timeout=self.timeout)
         if r.status_code != 200:
             raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
         resp = r.json()
@@ -41,10 +42,10 @@ class Resource(object):
     
 
 class Bridge(Resource):
-    def __init__(self, ip, username=None):
+    def __init__(self, ip, username=None, timeout=5):
         self.ip = ip
         self.username = username
         url = "http://{i}/api".format(i = self.ip)
         if username: 
             url += "/{u}".format(u=username)
-        super(Bridge, self).__init__(url)
+        super(Bridge, self).__init__(url, timeout=timeout)
