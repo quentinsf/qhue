@@ -2,7 +2,7 @@
 
 Qhue (pronounced 'Q') is an exceedingly thin Python wrapper for the Philips Hue API.
 
-I wrote it because some of the other (excellent) frameworks out there weren't quite keeping up with developments in the API.  Because Qhue encodes almost none of the underlying models - it's really just a way of constructing URLs and HTTP calls - it should inherit any new features automatically.  The aim of Qhue is not to create another Python API for the Hue system, so much as to turn the existing API *into* Python, with minimal interference.
+I wrote it because some of the other (excellent) frameworks out there weren't quite keeping up with developments in the API.  Because Qhue encodes almost none of the underlying models - it's really just a way of constructing URLs and HTTP calls - it should inherit any new API features automatically.  The aim of Qhue is not to create another Python API for the Hue system, so much as to turn the existing API *into* Python, with minimal interference.
 
 ## Understanding Qhue
 
@@ -14,7 +14,7 @@ You can (and should) read [the full documentation here](http://www.developers.me
 
 You can read information about light 1 by doing an HTTP GET of this URL, and modify it by doing an HTTP PUT.
 
-The `qhue` module has a Resource class, which represents something that has a URL. By calling an instance of the class, you'll make an HTTP request to the hub.  It also has a Bridge class, which is a handy starting point, and is itself a Resource. 
+The `qhue` module has a Resource class, which represents something that has a URL. By calling an instance of this class, you'll make an HTTP request to the hub.  It also has a Bridge class, which is a handy starting point, and is itself a Resource.  If that seems a bit abstract, don't worry - all will be made clear below.
 
 ## Examples
 
@@ -22,7 +22,9 @@ Note: These examples assume you know the IP address of your bridge.  See [the 'G
 
 They also assume you have experimented with the API before, and so have a 'newdeveloper' user account set up on the bridge.  If not, see the section below entitled 'Creating a user'. 
 
-OK.  If you have a Resource, you can check its URL. A Bridge is an example of a Resource, so let's try that:
+OK.  Now those preliminaries are out of the way...
+
+If you have a Resource, you can check its URL. A Bridge is an example of a Resource, so let's try that:
 
     # Connect to the bridge with a particular username
     from qhue import Bridge
@@ -31,32 +33,37 @@ OK.  If you have a Resource, you can check its URL. A Bridge is an example of a 
     # This should give you something familiar from the API docs:
     print b.url 
 
-By requesting most other attributes of a Resource, you will construct a new Resource with the attribute name added to the URL:
+By requesting most other attributes of a Resource object, you will construct a new Resource with the attribute name added to the URL:
 
-    lights = b.lights
+    lights = b.lights   # Creates a new Resource with its own URL
     print lights.url    # Should have '/lights' on the end
 
-These are, at this stage, simply references to entities on the bridge. To make an actual API call to the bridge, we simply call the resource as if it were a function:
+These Resources are, at this stage, simply *references* to entities on the bridge. To make an actual API call to the bridge, we simply call the Resource as if it were a function:
 
     # Let's actually call the API and print the results
     print lights()  
 
-Qhue takes the JSON that's returned and turns it back into Python objects, typically a dictionary, so you can access its parts easily:
+Qhue takes the JSON that's returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily:
 
-    # Get the config info and print the ethernet MAC address
+    # Get the bridge's config info and print the ethernet MAC address
     print b.config()['mac']
 
-Ideally, we'd like to be able to construct all of our URLs the same way, but you can't use numbers as attribute names, so we can't write, say, `b.lights.1`.  As an alternative, you can use dictionary key syntax:
+Now, ideally, we'd like to be able to construct all of our URLs the same way, but you can't use numbers as attribute names, so we can't write, say, `b.lights.1` to refer to light 1.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax:
 
     # Get information about light 1
     print b.lights[1]()
 
+    # or, to do the same thing another way:
+    print b['lights'][1]()
+
 Alternatively, when you call a resource, you can give it arguments, which will be added to its URL:
 
-    # This is the same as the last example:
+    # This is the same as the last examples:
     print b('lights', 1)
 
-To make a change to a value, you use a keyword argument.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
+So there are several ways to express the same thing, and you can choose the one which fits most elegantly into your code.
+
+To make a change to a value, you also call the resource, but using a keyword argument.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
 
     b.lights[1].state(bri=128, hue=9000)
 
@@ -94,7 +101,7 @@ This should succeed, and you can now get a new Bridge object as shown in the exa
 
 ## Prerequisites
 
-This works under Python 2.  It may work under Python 3.  It uses Kenneth Reitz's excellent [requests](http://docs.python-requests.org/en/latest/) module, so you'll need to do:
+This works under Python 2 and Python 3.  It uses Kenneth Reitz's excellent [requests](http://docs.python-requests.org/en/latest/) module, so you'll need to do:
 
     pip install requests
 
