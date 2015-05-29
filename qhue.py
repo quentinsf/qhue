@@ -19,9 +19,9 @@ class Resource(object):
         http_method = kwargs.pop('http_method',
             'get' if not kwargs else 'put').lower()
         if http_method == 'put':
-            r = requests.put(url, data=json.dumps(kwargs), timeout=self.timeout)
+            r = requests.put(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
         elif http_method == 'post':
-            r = requests.post(url, data=json.dumps(kwargs), timeout=self.timeout)
+            r = requests.post(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
         elif http_method == 'delete':
             r = requests.delete(url, timeout=self.timeout)
         else:
