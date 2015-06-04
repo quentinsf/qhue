@@ -36,7 +36,7 @@ class Resource(object):
         return resp
         
     def __getattr__(self, name):
-        return Resource(self.url + "/" + str(name))
+        return Resource(self.url + "/" + str(name), timeout=self.timeout)
 
     __getitem__ = __getattr__
     
