@@ -90,14 +90,15 @@ If you haven't used the API before, you'll need to create a user account on the 
 
     from qhue import Bridge
     b = Bridge("192.168.0.45")  # No username yet
-    b(devicetype="test user", username="newdeveloper", http_method="post")
+    b(devicetype="test user", http_method="post")
 
 You'll get an error back saying that the link button on the bridge needs to be pressed.  Go and press it, and then run the command again:
 
-    b(devicetype="test user", username="newdeveloper", http_method="post")
+    b(devicetype="test user", http_method="post")
 
-This should succeed, and you can now get a new Bridge object as shown in the examples above, passing this username as the second argument.
+This should succeed, and return a generated username. You can now get a new Bridge object as shown in the examples above, passing this username as the second argument.
 
+Please have a look at the qhue_example.py for a method to store the username for future sessions.
 
 ## Prerequisites
 
