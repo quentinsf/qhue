@@ -20,7 +20,7 @@ The `qhue` module has a Resource class, which represents something that has a UR
 
 Note: These examples assume you know the IP address of your bridge.  See [the 'Getting Started' section of the API docs](http://www.developers.meethue.com/documentation/getting-started) if you need help in finding it.  I've assigned mine a static address of 192.168.0.45, so that's what you'll see below.
 
-They also assume you have experimented with the API before, and so have a 'newdeveloper' user account set up on the bridge.  If not, see the section below entitled 'Creating a user'. 
+They also assume you have experimented with the API before, and so have a user account set up on the bridge, and the username stored somewhere.  If not, see the section below entitled 'Creating a user'. 
 
 OK.  Now those preliminaries are out of the way...
 
@@ -28,7 +28,7 @@ If you have a Resource, you can check its URL. A Bridge is an example of a Resou
 
     # Connect to the bridge with a particular username
     from qhue import Bridge
-    b = Bridge("192.168.0.45", 'newdeveloper')
+    b = Bridge("192.168.0.45", username)
 
     # This should give you something familiar from the API docs:
     print b.url 
@@ -88,17 +88,12 @@ And, at present, that's about it.  How's that for approximately 50 lines of code
 
 If you haven't used the API before, you'll need to create a user account on the bridge.
 
-    from qhue import Bridge
-    b = Bridge("192.168.0.45")  # No username yet
-    b(devicetype="test user", http_method="post")
+    from qhue import create_new_username
+    username = create_new_username("192.168.0.45")
 
-You'll get an error back saying that the link button on the bridge needs to be pressed.  Go and press it, and then run the command again:
+You'll get a prompt saying that the link button on the bridge needs to be pressed.  Go and press it, and you should get a generated username. You can now get a new Bridge object as shown in the examples above, passing this username as the second argument.
 
-    b(devicetype="test user", http_method="post")
-
-This should succeed, and return a generated username. You can now get a new Bridge object as shown in the examples above, passing this username as the second argument.
-
-Please have a look at the qhue_example.py for a method to store the username for future sessions.
+Please have a look at the examples directory for a method to store the username for future sessions.
 
 ## Prerequisites
 
