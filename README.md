@@ -16,6 +16,14 @@ You can read information about light 1 by doing an HTTP GET of this URL, and mod
 
 The `qhue` module has a Resource class, which represents something that has a URL. By calling an instance of this class, you'll make an HTTP request to the hub.  It also has a Bridge class, which is a handy starting point, and is itself a Resource.  If that seems a bit abstract, don't worry - all will be made clear below.
 
+## Installing Qhue
+
+That's easy.
+
+    pip install qhue
+
+You may want to check [GitHub](https://github.com/quentinsf/qhue) for the very latest version.
+
 ## Examples
 
 Note: These examples assume you know the IP address of your bridge.  See [the 'Getting Started' section of the API docs](http://www.developers.meethue.com/documentation/getting-started) if you need help in finding it.  I've assigned mine a static address of 192.168.0.45, so that's what you'll see below.
@@ -101,7 +109,7 @@ This works under Python 2 and Python 3.  It uses Kenneth Reitz's excellent [requ
 
     pip install requests
 
-or something similar before using Qhue.
+or something similar before using Qhue.  If you installed Qhue itself using pip, this shouldn't be necessary.
 
 
 ## Licence
