@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import path
-from qhue import Bridge, QhueException
+from qhue import Bridge, QhueException, create_new_username
 
 # the IP address of your bridge
 BRIDGE_IP = "192.168.2.3"
@@ -13,17 +13,10 @@ def main():
 
     # check for a credential file
     if not path.exists(CRED_FILE_PATH):
-        # create a bridge resource
-        bridge = Bridge(BRIDGE_IP)
 
         while True:
-            # press the bridge button
-            raw_input("Press the bridge button, then press Return.")
-
-            # connect anonymously to the bridge to create a user
             try:
-                response = bridge(devicetype="testdev", http_method="post")
-                username = response[0]["success"]["username"]
+                username = create_new_username(BRIDGE_IP)
                 break
             except QhueException as err:
                 print "Error occurred while creating a new username: {}".format(err)
@@ -36,7 +29,7 @@ def main():
         with open(CRED_FILE_PATH, "r") as cred_file:
             username = cred_file.read()
 
-    # (re)create the bridge resource, passing the captured username
+    # create the bridge resource, passing the captured username
     bridge = Bridge(BRIDGE_IP, username)
 
     # create a lights resource

@@ -3,14 +3,17 @@
 
 import requests
 import json
+# for hostname retrieval for registering with the bridge
+from socket import getfqdn
 
-__all__ = ('Bridge', 'QhueException')
+__all__ = ('Bridge', 'QhueException', 'create_new_username')
 
-class QhueException(Exception):
-    pass
+# default timeout in seconds
+_DEFAULT_TIMEOUT = 5
+
 
 class Resource(object):
-    def __init__(self, url, timeout=5):
+    def __init__(self, url, timeout=_DEFAULT_TIMEOUT):
         self.url = url
         self.timeout = timeout
 
@@ -43,11 +46,53 @@ class Resource(object):
     __getitem__ = __getattr__
 
 
+def _api_url(ip, username=None):
+    if username is None:
+        return "http://{}/api".format(ip)
+    else:
+        return "http://{}/api/{}".format(ip, username)
+
+def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
+    """Interactive helper function to generate a new anonymous username.
+
+    Args:
+        ip: ip address of the bridge
+        devicetype (optional): devicetype to register with the bridge. If
+            unprovided, generates a device type based on the local hostname.
+        timeout (optional, default=5): request timeout in seconds
+    Raises:
+        QhueException if something went wrong with username generation (for
+            example, if the bridge button wasn't pressed).
+    """
+    res = Resource(_api_url(ip), timeout)
+    raw_input("Press the Bridge button, then press Return.")
+
+    fq_device_type = "qhue@{}".format(getfqdn())
+
+    # raises QhueException if something went wrong
+    response = res(devicetype=fq_device_type, http_method="post")
+
+    return response[0]["success"]["username"]
+
+
 class Bridge(Resource):
-    def __init__(self, ip, username=None, timeout=5):
+    def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT):
+        """Create a new connection to a hue bridge.
+
+        If a whitelisted username has not been generated yet, first, use
+        create_new_username to have the bridge interactively generate a random
+        username and then construct.
+
+        Args:
+            ip: ip address of the bridge
+            username: valid username for the bridge
+            timeout (optional, default=5): request timeout in seconds
+        """
         self.ip = ip
         self.username = username
-        url = "http://{i}/api".format(i = self.ip)
-        if username:
-            url += "/{u}".format(u=username)
+        url = _api_url(ip, username)
         super(Bridge, self).__init__(url, timeout=timeout)
+
+
+class QhueException(Exception):
+    pass
