@@ -120,6 +120,8 @@ Suggestions, patches, pull requests welcome.  There are many ways this could be 
 
 If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
 
+Many thanks to Chris Macklin, Andrea Jemmett, Martin Paulus and Richard Morrison for their contributions!
+
 [Quentin Stafford-Fraser](http://quentinsf.com)
 
 
