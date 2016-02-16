@@ -4,7 +4,7 @@ from os import path
 from qhue import Bridge, QhueException, create_new_username
 
 # the IP address of your bridge
-BRIDGE_IP = "192.168.2.3"
+BRIDGE_IP = "192.168.0.45"
 
 # the path for the username credentials file
 CRED_FILE_PATH = "qhue_username.txt"
