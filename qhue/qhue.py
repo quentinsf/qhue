@@ -65,7 +65,9 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
             example, if the bridge button wasn't pressed).
     """
     res = Resource(_api_url(ip), timeout)
-    raw_input("Press the Bridge button, then press Return.")
+    # Deal with one of the sillier python3 changes
+    real_raw_input = getattr(__builtins__, 'raw_input', input)
+    real_raw_input("Press the Bridge button, then press Return.")
 
     fq_device_type = "qhue@{}".format(getfqdn())
 
