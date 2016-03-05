@@ -89,7 +89,15 @@ Sometimes, though, you need to specify a POST or a DELETE, and you can do so wit
     # Delete rule 1
     b('rules', 1, http_method='delete')
 
-And, at present, that's about it.  How's that for approximately 50 lines of code?
+Finally, for certain operations, like schedules and rules, you'll want to know the 'address' of a resource, which is the absolute URL path - the bit after the IP address.  You can get that with the `address` attribute:
+
+    >>> b.groups[1].url
+    'http://192.168.0.45/api/ac594202624a7211ac44615430a461/groups/1'
+    >>> b.groups[1].address
+    '/api/ac594202624a7211ac44615430a461/groups/1'
+
+And, at present, that's about it. 
+
 
 
 ## Creating a user
