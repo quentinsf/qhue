@@ -120,6 +120,14 @@ You'll get a prompt saying that the link button on the bridge needs to be presse
 
 Please have a look at the examples directory for a method to store the username for future sessions.
 
+
+## Usage notes
+
+Please note that qhue won't do any local checking of any method calls or arguments - it just packages up what you give it and sends it to the bridge.
+
+An important example of this is that the bridge is expecting integer values for things like colour temperature and brightness. If, say, you do a calculation for your colour which returns a float, you need to convert that to an int before sending or it will be ignored.  (Sending a string returns an error, but sending a float does not.)
+
+
 ## Prerequisites
 
 This works under Python 2 and Python 3.  It uses Kenneth Reitz's excellent [requests](http://docs.python-requests.org/en/latest/) module, so you'll need to do:
@@ -140,7 +148,7 @@ Suggestions, patches, pull requests welcome.  There are many ways this could be 
 
 If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
 
-Many thanks to Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner and Richard Morrison for their contributions!
+Many thanks to Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner, Matthew Clapp, Marcus Klaas de Vries and Richard Morrison, amongst others, for their contributions!
 
 [Quentin Stafford-Fraser](http://quentinsf.com)
 
