@@ -5,6 +5,7 @@ import requests
 import json
 # for hostname retrieval for registering with the bridge
 from socket import getfqdn
+import sys
 
 __all__ = ('Bridge', 'QhueException', 'create_new_username')
 
@@ -66,9 +67,12 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
             example, if the bridge button wasn't pressed).
     """
     res = Resource(_api_url(ip), timeout)
+    prompt = "Press the Bridge button, then press Return: "
     # Deal with one of the sillier python3 changes
-    real_raw_input = getattr(__builtins__, 'raw_input', input)
-    real_raw_input("Press the Bridge button, then press Return: ")
+    if sys.version_info.major == 2:
+        _ = raw_input(prompt)
+    else:
+        _ = input(prompt)
 
     fq_device_type = "qhue@{}".format(getfqdn())
 
