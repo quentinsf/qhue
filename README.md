@@ -24,7 +24,7 @@ That's easy.
 
     pip install qhue
 
-You may want to check [GitHub](https://github.com/quentinsf/qhue) for the very latest version.
+You may want to check [GitHub](https://github.com/quentinsf/qhue) for the very latest version of the module, and of this documentation.
 
 ## Examples
 
@@ -50,7 +50,7 @@ By requesting most other attributes of a Resource object, you will construct a n
     lights = b.lights   # Creates a new Resource with its own URL
     print lights.url    # Should have '/lights' on the end
 
-These Resources are, at this stage, simply *references* to entities on the bridge. To make an actual API call to the bridge, we simply call the Resource as if it were a function:
+These Resources are, at this stage, simply *references* to entities on the bridge. To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
     # Let's actually call the API and print the results
     print lights()  
@@ -61,7 +61,7 @@ Qhue takes the JSON that is returned by the API and turns it back into Python ob
     # and print the ethernet MAC address
     print b.config()['mac']
 
-Now, ideally, we'd like to be able to construct all of our URLs the same way, so we'd refer to light 1 as `b.lights.1`, but you can't use numbers as attribute names.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
+Now, ideally, we'd like to be able to construct all of our URLs the same way, so we'd refer to light 1 as `b.lights.1`, but you can't use numbers as attribute names in Python.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
 
     # Get information about light 1
     print b.lights[1]()
@@ -76,7 +76,9 @@ Alternatively, when you *call* a resource, you can give it arguments, which will
 
 So there are several ways to express the same thing, and you can choose the one which fits most elegantly into your code.
 
-Now, to make a change to a value, you also call the resource, but using a keyword argument.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
+### Making changes
+
+Now, to make a change to a value, you also call the resource, but using a keyword argument to specify the property you want to change.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
 
     b.lights[1].state(bri=128, hue=9000)
 
@@ -91,7 +93,7 @@ and you can mix URL-constructing positional arguments with value-setting keyword
 
 
 
-This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET.  If you do, it will be a PUT.  
+This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will be a PUT, and will change the current status.  
 
 Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
 
@@ -105,8 +107,11 @@ Finally, for certain operations, like schedules and rules, you'll want to know t
     >>> b.groups[1].address
     '/api/ac594202624a7211ac44615430a461/groups/1'
 
+See the API docs for more information about when you need this.
+
 And, at present, that's about it. 
 
+If you're familiar with the iPython Notebook system, it can be a fun way to explore the API.  See the [Qhue Playground example notebook](Qhue%20playground.ipynb).
 
 
 ## Creating a user
