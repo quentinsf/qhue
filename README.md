@@ -50,18 +50,18 @@ By requesting most other attributes of a Resource object, you will construct a n
     lights = b.lights   # Creates a new Resource with its own URL
     print lights.url    # Should have '/lights' on the end
 
-These Resources are, at this stage, simply *references* to entities on the bridge. To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
+Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't communicated with it yet.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
     # Let's actually call the API and print the results
     print lights()  
 
-Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily:
+Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily, for example:
 
     # Get the bridge's configuration info as a dict,
     # and print the ethernet MAC address
     print b.config()['mac']
 
-Now, ideally, we'd like to be able to construct all of our URLs the same way, so we'd refer to light 1 as `b.lights.1`, but you can't use numbers as attribute names in Python.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
+Now, ideally, we'd like to be able to construct all of our URLs the same way, so we would refer to light 1 as `b.lights.1`, for example, but you can't use numbers as attribute names in Python.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
 
     # Get information about light 1
     print b.lights[1]()
