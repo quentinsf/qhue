@@ -91,7 +91,7 @@ and you can mix URL-constructing positional arguments with value-setting keyword
     b.lights(1, 'state', bri=128, hue=9000)
     b('lights', 1, 'state', bri=128, hue=9000)
 
-
+When you need to specify boolean true/false values, you should use the native Python True and False.
 
 This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will be a PUT, and will change the current status.  
 
