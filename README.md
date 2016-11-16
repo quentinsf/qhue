@@ -30,7 +30,7 @@ You may want to check [GitHub](https://github.com/quentinsf/qhue) for the very l
 
 Note: These examples assume you know the IP address of your bridge.  See [the 'Getting Started' section of the API docs](http://www.developers.meethue.com/documentation/getting-started) if you need help in finding it.  I've assigned mine a static address of 192.168.0.45, so that's what you'll see below.
 
-They also assume you have experimented with the API before, and so have a user account set up on the bridge, and the username stored somewhere.  If not, see the section below entitled 'Creating a user'. 
+They also assume you have experimented with the API before, and so have a user account set up on the bridge, and the username stored somewhere.  If not, see the section below entitled 'Creating a user'.
 
 OK.  Now those preliminaries are out of the way...
 
@@ -43,7 +43,7 @@ First, let's create a Bridge, which will be your top-level Resource.
 You can see the URL of any Resource:
 
     # This should give you something familiar from the API docs:
-    print b.url 
+    print b.url
 
 By requesting most other attributes of a Resource object, you will construct a new Resource with the attribute name added to the URL of the original one:
 
@@ -53,7 +53,7 @@ By requesting most other attributes of a Resource object, you will construct a n
 Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't communicated with it yet.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
     # Let's actually call the API and print the results
-    print lights()  
+    print lights()
 
 Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily, for example:
 
@@ -93,7 +93,7 @@ and you can mix URL-constructing positional arguments with value-setting keyword
 
 When you need to specify boolean true/false values, you should use the native Python True and False.
 
-This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will be a PUT, and will change the current status.  
+This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will be a PUT, and will change the current status.
 
 Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
 
@@ -109,9 +109,17 @@ Finally, for certain operations, like schedules and rules, you'll want to know t
 
 See the API docs for more information about when you need this.
 
-And, at present, that's about it. 
+And, at present, that's about it.
 
-If you're familiar with the iPython Notebook system, it can be a fun way to explore the API.  See the [Qhue Playground example notebook](Qhue%20playground.ipynb).
+
+## A couple of hints:
+
+Some of the requests can return large amounts of information.  A handy way to make it more readable is to format it as YAML.  You may need to `pip install PyYAML`, then try the following:
+
+    import yaml
+    print yaml.safe_dump(bridge.groups(), indent=4)
+
+If you're familiar with the Jupyter (iPython) Notebook system, it can be a fun way to explore the API.  See the [Qhue Playground example notebook](Qhue%20playground.ipynb).
 
 
 ## Creating a user
@@ -149,7 +157,7 @@ This little snippet is distributed under the GPL v2. See the LICENSE file. (They
 
 ## Contributing
 
-Suggestions, patches, pull requests welcome.  There are many ways this could be improved.  
+Suggestions, patches, pull requests welcome.  There are many ways this could be improved.
 
 If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
 
