@@ -47,7 +47,6 @@ class Resource(object):
 
     __getitem__ = __getattr__
 
-
 def _api_url(ip, username=None):
     if username is None:
         return "http://{}/api".format(ip)
@@ -86,9 +85,9 @@ class Bridge(Resource):
     def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT):
         """Create a new connection to a hue bridge.
 
-        If a whitelisted username has not been generated yet, first, use
-        create_new_username to have the bridge interactively generate a random
-        username and then construct.
+        If a whitelisted username has not been generated yet, use 
+        create_new_username to have the bridge interactively generate 
+        a random username and then pass it to this function.
 
         Args:
             ip: ip address of the bridge

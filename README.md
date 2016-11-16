@@ -24,13 +24,13 @@ That's easy.
 
     pip install qhue
 
-You may want to check [GitHub](https://github.com/quentinsf/qhue) for the very latest version.
+You may want to check [GitHub](https://github.com/quentinsf/qhue) for the very latest version of the module, and of this documentation.
 
 ## Examples
 
 Note: These examples assume you know the IP address of your bridge.  See [the 'Getting Started' section of the API docs](http://www.developers.meethue.com/documentation/getting-started) if you need help in finding it.  I've assigned mine a static address of 192.168.0.45, so that's what you'll see below.
 
-They also assume you have experimented with the API before, and so have a user account set up on the bridge, and the username stored somewhere.  If not, see the section below entitled 'Creating a user'. 
+They also assume you have experimented with the API before, and so have a user account set up on the bridge, and the username stored somewhere.  If not, see the section below entitled 'Creating a user'.
 
 OK.  Now those preliminaries are out of the way...
 
@@ -43,25 +43,25 @@ First, let's create a Bridge, which will be your top-level Resource.
 You can see the URL of any Resource:
 
     # This should give you something familiar from the API docs:
-    print b.url 
+    print b.url
 
 By requesting most other attributes of a Resource object, you will construct a new Resource with the attribute name added to the URL of the original one:
 
     lights = b.lights   # Creates a new Resource with its own URL
     print lights.url    # Should have '/lights' on the end
 
-These Resources are, at this stage, simply *references* to entities on the bridge. To make an actual API call to the bridge, we simply call the Resource as if it were a function:
+Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't communicated with it yet.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
     # Let's actually call the API and print the results
-    print lights()  
+    print lights()
 
-Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily:
+Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily, for example:
 
     # Get the bridge's configuration info as a dict,
     # and print the ethernet MAC address
     print b.config()['mac']
 
-Now, ideally, we'd like to be able to construct all of our URLs the same way, so we'd refer to light 1 as `b.lights.1`, but you can't use numbers as attribute names.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
+Now, ideally, we'd like to be able to construct all of our URLs the same way, so we would refer to light 1 as `b.lights.1`, for example, but you can't use numbers as attribute names in Python.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
 
     # Get information about light 1
     print b.lights[1]()
@@ -76,7 +76,9 @@ Alternatively, when you *call* a resource, you can give it arguments, which will
 
 So there are several ways to express the same thing, and you can choose the one which fits most elegantly into your code.
 
-Now, to make a change to a value, you also call the resource, but using a keyword argument.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
+### Making changes
+
+Now, to make a change to a value, you also call the resource, but using a keyword argument to specify the property you want to change.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
 
     b.lights[1].state(bri=128, hue=9000)
 
@@ -89,9 +91,9 @@ and you can mix URL-constructing positional arguments with value-setting keyword
     b.lights(1, 'state', bri=128, hue=9000)
     b('lights', 1, 'state', bri=128, hue=9000)
 
+When you need to specify boolean true/false values, you should use the native Python True and False.
 
-
-This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET.  If you do, it will be a PUT.  
+This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will be a PUT, and will change the current status.
 
 Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
 
@@ -105,8 +107,19 @@ Finally, for certain operations, like schedules and rules, you'll want to know t
     >>> b.groups[1].address
     '/api/ac594202624a7211ac44615430a461/groups/1'
 
-And, at present, that's about it. 
+See the API docs for more information about when you need this.
 
+And, at present, that's about it.
+
+
+## A couple of hints:
+
+Some of the requests can return large amounts of information.  A handy way to make it more readable is to format it as YAML.  You may need to `pip install PyYAML`, then try the following:
+
+    import yaml
+    print yaml.safe_dump(bridge.groups(), indent=4)
+
+If you're familiar with the Jupyter (iPython) Notebook system, it can be a fun way to explore the API.  See the [Qhue Playground example notebook](Qhue%20playground.ipynb).
 
 
 ## Creating a user
@@ -144,7 +157,7 @@ This little snippet is distributed under the GPL v2. See the LICENSE file. (They
 
 ## Contributing
 
-Suggestions, patches, pull requests welcome.  There are many ways this could be improved.  
+Suggestions, patches, pull requests welcome.  There are many ways this could be improved.
 
 If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
 
