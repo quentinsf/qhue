@@ -43,36 +43,36 @@ First, let's create a Bridge, which will be your top-level Resource.
 You can see the URL of any Resource:
 
     # This should give you something familiar from the API docs:
-    print b.url
+    print(b.url)
 
 By requesting most other attributes of a Resource object, you will construct a new Resource with the attribute name added to the URL of the original one:
 
     lights = b.lights   # Creates a new Resource with its own URL
-    print lights.url    # Should have '/lights' on the end
+    print(lights.url)    # Should have '/lights' on the end
 
 Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't communicated with it yet.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
     # Let's actually call the API and print the results
-    print lights()
+    print(lights())
 
 Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily, for example:
 
     # Get the bridge's configuration info as a dict,
     # and print the ethernet MAC address
-    print b.config()['mac']
+    print(b.config()['mac'])
 
 Now, ideally, we'd like to be able to construct all of our URLs the same way, so we would refer to light 1 as `b.lights.1`, for example, but you can't use numbers as attribute names in Python.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
 
     # Get information about light 1
-    print b.lights[1]()
+    print(b.lights[1]())
 
     # or, to do the same thing another way:
-    print b['lights'][1]()
+    print(b['lights'][1]())
 
 Alternatively, when you *call* a resource, you can give it arguments, which will be added to its URL when making the call:
 
     # This is the same as the last examples:
-    print b('lights', 1)
+    print(b('lights', 1))
 
 So there are several ways to express the same thing, and you can choose the one which fits most elegantly into your code.
 
@@ -117,7 +117,7 @@ And, at present, that's about it.
 Some of the requests can return large amounts of information.  A handy way to make it more readable is to format it as YAML.  You may need to `pip install PyYAML`, then try the following:
 
     import yaml
-    print yaml.safe_dump(bridge.groups(), indent=4)
+    print(yaml.safe_dump(bridge.groups(), indent=4))
 
 If you're familiar with the Jupyter (iPython) Notebook system, it can be a fun way to explore the API.  See the [Qhue Playground example notebook](Qhue%20playground.ipynb).
 
@@ -164,5 +164,3 @@ If you can do so in a general way, without adding too many lines, that would be 
 Many thanks to Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner, Matthew Clapp, Marcus Klaas de Vries and Richard Morrison, amongst others, for their contributions!
 
 [Quentin Stafford-Fraser](http://quentinsf.com)
-
-
