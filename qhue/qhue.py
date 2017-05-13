@@ -5,6 +5,7 @@ import requests
 import json
 # for hostname retrieval for registering with the bridge
 from socket import getfqdn
+import re
 import sys
 
 __all__ = ('Bridge', 'QhueException', 'create_new_username')
@@ -16,7 +17,7 @@ _DEFAULT_TIMEOUT = 5
 class Resource(object):
     def __init__(self, url, timeout=_DEFAULT_TIMEOUT):
         self.url = url
-        self.address = url[url.find('/api'):]
+        self.address = re.search(r'/api/[^/]*(.*)', url).group(1)
         self.timeout = timeout
 
     def __call__(self, *args, **kwargs):
