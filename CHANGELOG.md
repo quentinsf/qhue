@@ -2,7 +2,7 @@
 
 By its very nature, the core of Qhue doesn't change very much!  Most recent updates are primarily about documentation.
 
-## Develop branch
+## 1.0.6 - 2017-05-14
 
 * README updates
 * Addition of short_address attribute
