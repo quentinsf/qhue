@@ -5,6 +5,7 @@ By its very nature, the core of Qhue doesn't change very much!  Most recent upda
 ## Develop branch
 
 * README updates
+* Addition of short_address attribute
 
 ## 1.0.5 - 2016-11-16 
 
