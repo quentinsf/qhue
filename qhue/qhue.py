@@ -1,4 +1,4 @@
-# Qhue is (c) Quentin Stafford-Fraser 2014
+# Qhue is (c) Quentin Stafford-Fraser 2017
 # but distributed under the GPL v2.
 
 import requests
@@ -38,7 +38,7 @@ class Resource(object):
         if r.status_code != 200:
             raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
         resp = r.json()
-        if type(resp)==list:
+        if type(resp) == list:
             errors = [m['error']['description'] for m in resp if 'error' in m]
             if errors:
                 raise QhueException("\n".join(errors))
