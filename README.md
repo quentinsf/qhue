@@ -24,7 +24,7 @@ That's easy.
 
     pip install qhue
 
-You may want to check [GitHub](https://github.com/quentinsf/qhue) for the very latest version of the module, and of this documentation.
+You may want to check [GitHub](https://github.com/quentinsf/qhue) for the  latest version of the module, and of this documentation.  The very latest code is likely to be on [the 'develop' branch](https://github.com/quentinsf/qhue/tree/develop).
 
 ## Examples
 
