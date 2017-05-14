@@ -78,7 +78,7 @@ So there are several ways to express the same thing, and you can choose the one 
 
 ### Making changes
 
-Now, to make a change to a value, you also call the resource, but using a keyword argument to specify the property you want to change.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
+Now, to make a change to a value, you also call the resource, but you add keyword arguments to specify the properties you want to change.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
 
     b.lights[1].state(bri=128, hue=9000)
 
@@ -93,6 +93,10 @@ and you can mix URL-constructing positional arguments with value-setting keyword
 
 When you need to specify boolean true/false values, you should use the native Python True and False.
 
+As a more complex example, if you want to set the brightness and colour temperature of a light in a given scene, you might use a call like this:
+
+    bridge.scenes[scene].lightstates[light](on=True, bri=bri, ct=ct)
+
 This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will be a PUT, and will change the current status.
 
 Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
@@ -100,12 +104,14 @@ Sometimes, though, you need to specify a POST or a DELETE, and you can do so wit
     # Delete rule 1
     b('rules', 1, http_method='delete')
 
-Finally, for certain operations, like schedules and rules, you'll want to know the 'address' of a resource, which is the absolute URL path - the bit after the IP address.  You can get that with the `address` attribute:
+Finally, for certain operations, like schedules and rules, you'll want to know the 'address' of a resource, which is the absolute URL path - the bit after the IP address, or, more recently, the bit after the username.  You can get these with the `address` and `short_address` attributes:
 
     >>> b.groups[1].url
     'http://192.168.0.45/api/ac594202624a7211ac44615430a461/groups/1'
     >>> b.groups[1].address
     '/api/ac594202624a7211ac44615430a461/groups/1'
+    >>> b.groups[1].short_address
+    '/groups/1'
 
 See the API docs for more information about when you need this.
 
