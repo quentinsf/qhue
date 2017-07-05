@@ -2,6 +2,10 @@
 
 By its very nature, the core of Qhue doesn't change very much!  Most recent updates are primarily about documentation.
 
+## Next update
+
+* Demonstration notebook is more Python3-compatible.
+
 ## 1.0.8 - 2017-06-05
 
 * Creation of the short_address attribute would fail when a username was not yet assigned.  Fixed.
