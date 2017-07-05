@@ -15,10 +15,15 @@ _DEFAULT_TIMEOUT = 5
 
 
 class Resource(object):
+
     def __init__(self, url, timeout=_DEFAULT_TIMEOUT):
         self.url = url
         self.address = url[url.find('/api'):]
-        self.short_address = re.search(r'/api/[^/]*(.*)', url).group(1)
+        # Also find the bit after the username, if there is one
+        self.short_address = None
+        post_username_match = re.search(r'/api/[^/]*(.*)', url)
+        if post_username_match is not None:
+            self.short_address = post_username_match.group(1)
         self.timeout = timeout
 
     def __call__(self, *args, **kwargs):
@@ -49,11 +54,13 @@ class Resource(object):
 
     __getitem__ = __getattr__
 
+
 def _api_url(ip, username=None):
     if username is None:
         return "http://{}/api".format(ip)
     else:
         return "http://{}/api/{}".format(ip, username)
+
 
 def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
     """Interactive helper function to generate a new anonymous username.
@@ -84,11 +91,12 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
 
 
 class Bridge(Resource):
+
     def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT):
         """Create a new connection to a hue bridge.
 
-        If a whitelisted username has not been generated yet, use 
-        create_new_username to have the bridge interactively generate 
+        If a whitelisted username has not been generated yet, use
+        create_new_username to have the bridge interactively generate
         a random username and then pass it to this function.
 
         Args:
