@@ -2,9 +2,11 @@
 
 By its very nature, the core of Qhue doesn't change very much!  Most recent updates are primarily about documentation.
 
-## Next update
+## 1.0.9 - 2017-12-10
 
 * Demonstration notebook is more Python3-compatible.
+* qhue_example.py will run under Python 2 or 3.
+* create_new_username now takes note of devicetype argument if specified.
 
 ## 1.0.8 - 2017-06-05
 
