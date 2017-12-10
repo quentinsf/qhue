@@ -19,7 +19,7 @@ def main():
                 username = create_new_username(BRIDGE_IP)
                 break
             except QhueException as err:
-                print "Error occurred while creating a new username: {}".format(err)
+                print("Error occurred while creating a new username: {}".format(err))
 
         # store the username in a credential file
         with open(CRED_FILE_PATH, "w") as cred_file:
@@ -36,7 +36,7 @@ def main():
     lights = bridge.lights
 
     # query the API and print the results
-    print lights()
+    print(lights())
 
 if __name__ == "__main__":
     main()
