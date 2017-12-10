@@ -82,10 +82,11 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
     else:
         _ = input(prompt)
 
-    fq_device_type = "qhue@{}".format(getfqdn())
+    if devicetype is None:
+        devicetype = "qhue#{}".format(getfqdn())
 
     # raises QhueException if something went wrong
-    response = res(devicetype=fq_device_type, http_method="post")
+    response = res(devicetype=devicetype, http_method="post")
 
     return response[0]["success"]["username"]
 
