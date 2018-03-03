@@ -7,8 +7,9 @@ import json
 from socket import getfqdn
 import re
 import sys
+import os
 
-__all__ = ('Bridge', 'QhueException', 'create_new_username')
+__all__ = ('Bridge', 'QhueException')
 
 # default timeout in seconds
 _DEFAULT_TIMEOUT = 5
@@ -54,46 +55,9 @@ class Resource(object):
 
     __getitem__ = __getattr__
 
-
-def _api_url(ip, username=None):
-    if username is None:
-        return "http://{}/api".format(ip)
-    else:
-        return "http://{}/api/{}".format(ip, username)
-
-
-def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
-    """Interactive helper function to generate a new anonymous username.
-
-    Args:
-        ip: ip address of the bridge
-        devicetype (optional): devicetype to register with the bridge. If
-            unprovided, generates a device type based on the local hostname.
-        timeout (optional, default=5): request timeout in seconds
-    Raises:
-        QhueException if something went wrong with username generation (for
-            example, if the bridge button wasn't pressed).
-    """
-    res = Resource(_api_url(ip), timeout)
-    prompt = "Press the Bridge button, then press Return: "
-    # Deal with one of the sillier python3 changes
-    if sys.version_info.major == 2:
-        _ = raw_input(prompt)
-    else:
-        _ = input(prompt)
-
-    if devicetype is None:
-        devicetype = "qhue#{}".format(getfqdn())
-
-    # raises QhueException if something went wrong
-    response = res(devicetype=devicetype, http_method="post")
-
-    return response[0]["success"]["username"]
-
-
 class Bridge(Resource):
 
-    def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT):
+    def __init__(self, ip, username=None, timeout=_DEFAULT_TIMEOUT):
         """Create a new connection to a hue bridge.
 
         If a whitelisted username has not been generated yet, use
@@ -106,9 +70,79 @@ class Bridge(Resource):
             timeout (optional, default=5): request timeout in seconds
         """
         self.ip = ip
+        if not username:
+            username = self.read_username_from_config(ip)
+
         self.username = username
-        url = _api_url(ip, username)
+        url = self._api_url(ip, username)
         super(Bridge, self).__init__(url, timeout=timeout)
+
+    @staticmethod
+    def _api_url(ip, username=None):
+        if username is None:
+            return "http://{}/api".format(ip)
+        else:
+            return "http://{}/api/{}".format(ip, username)
+
+    @classmethod
+    def create_new_username(cls, ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
+        """Interactive helper function to generate a new anonymous username.
+
+        Args:
+            ip: ip address of the bridge
+            devicetype (optional): devicetype to register with the bridge. If
+                unprovided, generates a device type based on the local hostname.
+            timeout (optional, default=5): request timeout in seconds
+        Raises:
+            QhueException if something went wrong with username generation (for
+                example, if the bridge button wasn't pressed).
+        """
+        res = Resource(cls._api_url(ip), timeout)
+        prompt = "Press the Bridge button, then press Return: "
+        # Deal with one of the sillier python3 changes
+        if sys.version_info.major == 2:
+            _ = raw_input(prompt)
+        else:
+            _ = input(prompt)
+
+        if devicetype is None:
+            devicetype = "qhue#{}".format(getfqdn())
+
+        # raises QhueException if something went wrong
+        response = res(devicetype=devicetype, http_method="post")
+
+        return response[0]["success"]["username"]
+
+    @classmethod
+    def read_username_from_config(cls, ip, filepath=os.path.expanduser('~/.config/qhue/username.conf'), retries=3, newuser=False):
+        # Check for a credential file
+        username = None
+        if newuser or not os.path.exists(filepath):
+            for x in range(retries):
+                try:
+                    username = cls.create_new_username(ip)
+                    break
+                except QhueException as err:
+                    print("Error occurred while creating a new username: {}".format(err))
+
+            if not username:
+                raise QhueException("Failed to create new user ({} attempts).\n".format(retries))
+            else:
+                # Create non existing config directory
+                directory = os.path.dirname(filepath)
+                if not os.path.exists(directory):
+                    os.makedirs(directory)
+
+                # Store the username in a credential file
+                with open(filepath, "w") as cred_file:
+                    cred_file.write(username)
+
+        # Read existing credential file
+        else:
+            with open(filepath, "r") as cred_file:
+                username = cred_file.read()
+
+        return username
 
 
 class QhueException(Exception):
