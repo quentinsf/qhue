@@ -57,7 +57,7 @@ class Resource(object):
 
 class Bridge(Resource):
 
-    def __init__(self, ip=None, username=None, timeout=_DEFAULT_TIMEOUT, configpath=os.path.expanduser('~/.config/qhue'), devicetype=None):
+    def __init__(self, ip=None, username=None, timeout=_DEFAULT_TIMEOUT, configpath=os.path.expanduser('~/.config/qhue'), devicetype=None, newip=False, newuser=False):
         """Create a new connection to a hue bridge.
 
         If a whitelisted username has not been generated yet, use
@@ -71,11 +71,11 @@ class Bridge(Resource):
         """
         self.configpath = configpath
         if not ip:
-            ip = self.read_ip_from_config()
+            ip = self.read_ip_from_config(newip=newip)
         self.ip = ip
 
         if not username:
-            username = self.read_username_from_config(devicetype=devicetype)
+            username = self.read_username_from_config(newuser=newuser, devicetype=devicetype)
         self.username = username
 
         url = self._api_url(self.ip, username)
@@ -117,10 +117,10 @@ class Bridge(Resource):
 
         return response[0]["success"]["username"]
 
-    def read_ip_from_config(self):
+    def read_ip_from_config(self, newip=False):
         filepath = os.path.join(self.configpath, 'ip.conf')
 
-        if not os.path.exists(filepath):
+        if newip or not os.path.exists(filepath):
             ip = input("Please enter the ip of the Hue bridge: ")
 
             # Create non existing config directory
