@@ -126,10 +126,10 @@ class Bridge(Resource):
             except ImportError:
                 ip = input("Please enter the ip of the Hue bridge: ")
             else:
-                print("Discovering Hue, please wait...")
+                print("Discovering Hue bridge, please wait...")
                 bridge_id, ip = discoverhue.find_bridges().popitem()
                 ip = ip.split('/')[2].split(':')[0]
-                print("Found bridge at ip", ip)
+                print("Found Hue bridge at ip", ip)
 
             # Create non existing config directory
             if not os.path.exists(self.configpath):
