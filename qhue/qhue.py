@@ -57,7 +57,7 @@ class Resource(object):
 
 class Bridge(Resource):
 
-    def __init__(self, ip, username=None, timeout=_DEFAULT_TIMEOUT, filepath=None):
+    def __init__(self, ip=None, username=None, timeout=_DEFAULT_TIMEOUT, configpath=os.path.expanduser('~/.config/qhue')):
         """Create a new connection to a hue bridge.
 
         If a whitelisted username has not been generated yet, use
@@ -69,12 +69,15 @@ class Bridge(Resource):
             username: valid username for the bridge
             timeout (optional, default=5): request timeout in seconds
         """
+        self.configpath = configpath
+        if not ip:
+            ip = self.read_ip_from_config()
         self.ip = ip
         if not username:
-            username = self.read_username_from_config(ip, filepath=filepath)
+            username = self.read_username_from_config()
 
         self.username = username
-        url = self._api_url(ip, username)
+        url = self._api_url(self.ip, username)
         super(Bridge, self).__init__(url, timeout=timeout)
 
     @staticmethod
@@ -113,17 +116,34 @@ class Bridge(Resource):
 
         return response[0]["success"]["username"]
 
-    @classmethod
-    def read_username_from_config(cls, ip, filepath=None, retries=3, newuser=False):
-        if not filepath:
-            filepath = os.path.expanduser('~/.config/qhue/username.conf')
+    def read_ip_from_config(self):
+        filepath = os.path.join(self.configpath, 'ip.conf')
 
+        if not os.path.exists(filepath):
+            ip = input("Please enter the ip of the Hue bridge: ")
+
+            # Create non existing config directory
+            if not os.path.exists(configpath):
+                os.makedirs(configpath)
+
+            # Store the username in a credential file
+            with open(filepath, "w") as ip_file:
+                ip_file.write(ip)
+
+        else:
+            with open(filepath, "r") as ip_file:
+                ip = ip_file.read()
+
+        return ip
+
+    def read_username_from_config(self, retries=3, newuser=False):
         # Check for a credential file
         username = None
+        filepath = os.path.join(self.configpath, 'username.conf')
         if newuser or not os.path.exists(filepath):
             for x in range(retries):
                 try:
-                    username = cls.create_new_username(ip)
+                    username = self.create_new_username(self.ip)
                     break
                 except QhueException as err:
                     print("Error occurred while creating a new username: {}".format(err))
@@ -132,9 +152,8 @@ class Bridge(Resource):
                 raise QhueException("Failed to create new user ({} attempts).\n".format(retries))
             else:
                 # Create non existing config directory
-                directory = os.path.dirname(filepath)
-                if not os.path.exists(directory):
-                    os.makedirs(directory)
+                if not os.path.exists(configpath):
+                    os.makedirs(configpath)
 
                 # Store the username in a credential file
                 with open(filepath, "w") as cred_file:

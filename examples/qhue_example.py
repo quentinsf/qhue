@@ -3,13 +3,10 @@
 from os import path
 from qhue import Bridge, QhueException
 
-# the IP address of your bridge
-BRIDGE_IP = "192.168.0.45"
-
 def main():
     # create the bridge resource, passing the captured username
     try:
-        bridge = Bridge(BRIDGE_IP)
+        bridge = Bridge()
     except QhueException as err:
         sys.exit("Error occurred while creating Hue bridge object: {}".format(err))
 
