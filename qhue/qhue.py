@@ -57,7 +57,7 @@ class Resource(object):
 
 class Bridge(Resource):
 
-    def __init__(self, ip=None, username=None, timeout=_DEFAULT_TIMEOUT, configpath=os.path.expanduser('~/.config/qhue')):
+    def __init__(self, ip=None, username=None, timeout=_DEFAULT_TIMEOUT, configpath=os.path.expanduser('~/.config/qhue'), devicetype=None):
         """Create a new connection to a hue bridge.
 
         If a whitelisted username has not been generated yet, use
@@ -74,7 +74,7 @@ class Bridge(Resource):
             ip = self.read_ip_from_config()
         self.ip = ip
         if not username:
-            username = self.read_username_from_config()
+            username = self.read_username_from_config(devicetype=devicetype)
 
         self.username = username
         url = self._api_url(self.ip, username)
@@ -136,14 +136,14 @@ class Bridge(Resource):
 
         return ip
 
-    def read_username_from_config(self, retries=3, newuser=False):
+    def read_username_from_config(self, retries=3, newuser=False, devicetype=None):
         # Check for a credential file
         username = None
         filepath = os.path.join(self.configpath, 'username.conf')
         if newuser or not os.path.exists(filepath):
             for x in range(retries):
                 try:
-                    username = self.create_new_username(self.ip)
+                    username = self.create_new_username(self.ip, devicetype=devicetype)
                     break
                 except QhueException as err:
                     print("Error occurred while creating a new username: {}".format(err))
