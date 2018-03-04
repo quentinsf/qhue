@@ -73,10 +73,11 @@ class Bridge(Resource):
         if not ip:
             ip = self.read_ip_from_config()
         self.ip = ip
+
         if not username:
             username = self.read_username_from_config(devicetype=devicetype)
-
         self.username = username
+
         url = self._api_url(self.ip, username)
         super(Bridge, self).__init__(url, timeout=timeout)
 
