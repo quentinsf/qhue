@@ -4,7 +4,7 @@ from os import path
 from qhue import Bridge, QhueException
 
 def main():
-    # create the bridge resource, passing the captured username
+    # create the bridge resource
     try:
         bridge = Bridge()
     except QhueException as err:

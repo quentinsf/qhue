@@ -121,11 +121,19 @@ class Bridge(Resource):
         filepath = os.path.join(self.configpath, 'ip.conf')
 
         if newip or not os.path.exists(filepath):
-            ip = input("Please enter the ip of the Hue bridge: ")
+            try:
+                import discoverhue
+            except ImportError:
+                ip = input("Please enter the ip of the Hue bridge: ")
+            else:
+                print("Discovering Hue, please wait...")
+                bridge_id, ip = discoverhue.find_bridges().popitem()
+                ip = ip.split('/')[2].split(':')[0]
+                print("Found bridge at ip", ip)
 
             # Create non existing config directory
-            if not os.path.exists(configpath):
-                os.makedirs(configpath)
+            if not os.path.exists(self.configpath):
+                os.makedirs(self.configpath)
 
             # Store the username in a credential file
             with open(filepath, "w") as ip_file:
@@ -153,8 +161,8 @@ class Bridge(Resource):
                 raise QhueException("Failed to create new user ({} attempts).\n".format(retries))
             else:
                 # Create non existing config directory
-                if not os.path.exists(configpath):
-                    os.makedirs(configpath)
+                if not os.path.exists(self.configpath):
+                    os.makedirs(self.configpath)
 
                 # Store the username in a credential file
                 with open(filepath, "w") as cred_file:
