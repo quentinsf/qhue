@@ -1,6 +1,7 @@
 # Qhue is (c) Quentin Stafford-Fraser 2017
 # but distributed under the GPL v2.
 
+import collections
 import requests
 import json
 # for hostname retrieval for registering with the bridge
@@ -42,7 +43,7 @@ class Resource(object):
             r = requests.get(url, timeout=self.timeout)
         if r.status_code != 200:
             raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
-        resp = r.json()
+        resp = r.json(object_pairs_hook=collections.OrderedDict)
         if type(resp) == list:
             errors = [m['error']['description'] for m in resp if 'error' in m]
             if errors:
