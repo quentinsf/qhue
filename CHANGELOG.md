@@ -2,7 +2,7 @@
 
 By its very nature, the core of Qhue doesn't change very much!  Most recent updates are primarily about documentation.
 
-## Next release
+## 1.0.10 - 2018-11-15
 
 * Add the object_pairs_hook option to the Bridge constructor.  This controls how JSON structures returned by the API are converted into Python, so you can use OrderedDicts instead of dicts if you want to preserve the (generally logical) ordering used by the bridge. (This does make dumping the structures as YAML more messy, though.)
 
