@@ -1,7 +1,6 @@
 # Qhue is (c) Quentin Stafford-Fraser 2017
 # but distributed under the GPL v2.
 
-import collections
 import requests
 import json
 # for hostname retrieval for registering with the bridge
@@ -16,8 +15,7 @@ _DEFAULT_TIMEOUT = 5
 
 
 class Resource(object):
-
-    def __init__(self, url, timeout=_DEFAULT_TIMEOUT):
+    def __init__(self, url, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
         self.url = url
         self.address = url[url.find('/api'):]
         # Also find the bit after the username, if there is one
@@ -26,6 +24,7 @@ class Resource(object):
         if post_username_match is not None:
             self.short_address = post_username_match.group(1)
         self.timeout = timeout
+        self.object_pairs_hook = object_pairs_hook
 
     def __call__(self, *args, **kwargs):
         url = self.url
@@ -43,7 +42,7 @@ class Resource(object):
             r = requests.get(url, timeout=self.timeout)
         if r.status_code != 200:
             raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
-        resp = r.json(object_pairs_hook=collections.OrderedDict)
+        resp = r.json(object_pairs_hook=self.object_pairs_hook)
         if type(resp) == list:
             errors = [m['error']['description'] for m in resp if 'error' in m]
             if errors:
@@ -51,7 +50,8 @@ class Resource(object):
         return resp
 
     def __getattr__(self, name):
-        return Resource(self.url + "/" + str(name), timeout=self.timeout)
+        return Resource(self.url + "/" + str(name), timeout=self.timeout,
+                object_pairs_hook=self.object_pairs_hook)
 
     __getitem__ = __getattr__
 
@@ -94,7 +94,7 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
 
 class Bridge(Resource):
 
-    def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT):
+    def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
         """Create a new connection to a hue bridge.
 
         If a whitelisted username has not been generated yet, use
@@ -105,11 +105,13 @@ class Bridge(Resource):
             ip: ip address of the bridge
             username: valid username for the bridge
             timeout (optional, default=5): request timeout in seconds
+            object_pairs_hook (optional): function called by JSON decoder with
+                the result of any object literal as an ordered list of pairs.
         """
         self.ip = ip
         self.username = username
         url = _api_url(ip, username)
-        super(Bridge, self).__init__(url, timeout=timeout)
+        super(Bridge, self).__init__(url, timeout=timeout, object_pairs_hook=object_pairs_hook)
 
 
 class QhueException(Exception):
