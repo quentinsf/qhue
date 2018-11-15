@@ -120,12 +120,14 @@ And, at present, that's about it.
 
 ## A couple of hints:
 
-Some of the requests can return large amounts of information.  A handy way to make it more readable is to format it as YAML.  You may need to `pip install PyYAML`, then try the following:
+* Some of the requests can return large amounts of information.  A handy way to make it more readable is to format it as YAML.  You may need to `pip install PyYAML`, then try the following:
 
-    import yaml
-    print yaml.safe_dump(bridge.groups(), indent=4)
+        import yaml  
+        print(yaml.safe_dump(bridge.groups(), indent=4))
 
-If you're familiar with the Jupyter (iPython) Notebook system, it can be a fun way to explore the API.  See the [Qhue Playground example notebook](Qhue%20playground.ipynb).
+* The Bridge generally returns items in a reasonably logical order. The order is not actually important, but if you wish to preserve it, then you probably *don't* want the JSON structures turned into Python dicts, since these do not generally preserve ordering.  When you construct the Bridge object, you can tell it to use another function to turn JSON dictionaries into Python structures, for example by specifying `object_pairs_hook=collections.OrderedDict`. This will give you OrderedDicts instead of dicts, which is a benefit in almost every way, except that any YAML output you create from it won't look so nice.
+
+* If you're familiar with the Jupyter (iPython) Notebook system, it can be a fun way to explore the API.  See the [Qhue Playground example notebook](Qhue%20playground.ipynb).
 
 
 ## Creating a user
@@ -167,7 +169,7 @@ Suggestions, patches, pull requests welcome.  There are many ways this could be 
 
 If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
 
-Many thanks to Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner, Matthew Clapp, Marcus Klaas de Vries and Richard Morrison, amongst others, for their contributions!
+Many thanks to David Coles, Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner, Matthew Clapp, Marcus Klaas de Vries and Richard Morrison, amongst others, for their contributions!
 
 [Quentin Stafford-Fraser](http://quentinsf.com)
 
