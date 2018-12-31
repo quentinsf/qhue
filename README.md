@@ -104,6 +104,14 @@ Sometimes, though, you need to specify a POST or a DELETE, and you can do so wit
     # Delete rule 1
     b('rules', 1, http_method='delete')
 
+If you need to specify a keyword argument that would conflict with a Python keyword, such as `class`, simply append an underscore to it, like this:
+
+    # Set property "class" to "Hallway".
+    # The trailing underscore will automatically be removed
+    # in the property name sent to the bridge.
+
+    b.groups[19](class_='Hallway')
+
 Finally, for certain operations, like schedules and rules, you'll want to know the 'address' of a resource, which is the absolute URL path - the bit after the IP address, or, more recently, the bit after the username.  You can get these with the `address` and `short_address` attributes:
 
     >>> b.groups[1].url

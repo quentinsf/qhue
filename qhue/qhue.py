@@ -27,11 +27,18 @@ class Resource(object):
         self.object_pairs_hook = object_pairs_hook
 
     def __call__(self, *args, **kwargs):
+        # Preprocess args and kwargs
         url = self.url
         for a in args:
             url += "/" + str(a)
         http_method = kwargs.pop('http_method',
             'get' if not kwargs else 'put').lower()
+
+        # From each keyword, strip one trailing underscore if it exists,
+        # then send them as parameters to the bridge. This allows for
+        # "escaping" of keywords that might conflict with Python syntax
+        # or with the specially-handled keyword "http_method".
+        kwargs = {(k[:-1] if k.endswith('_') else k): v for k, v in kwargs.items()}
         if http_method == 'put':
             r = requests.put(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
         elif http_method == 'post':
