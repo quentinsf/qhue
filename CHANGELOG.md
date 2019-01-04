@@ -2,6 +2,10 @@
 
 By its very nature, the core of Qhue doesn't change very much!  Most recent updates are primarily about documentation.
 
+## 1.0.12 - 2019-01-04
+
+* No functional changes, just packaging tweaks to include the README as the package description.
+
 ## 1.0.11 - 2019-01-04
 
 * If keyword argument names end with an underscore, it is removed before sending to the Bridge.  This means you can use, for example, 'class_', and not clash with Python keywords. 
