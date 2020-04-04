@@ -40,9 +40,9 @@ class Resource(object):
         # or with the specially-handled keyword "http_method".
         kwargs = {(k[:-1] if k.endswith('_') else k): v for k, v in kwargs.items()}
         if http_method == 'put':
-            r = requests.put(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
+            r = requests.put(url, data=json.dumps(kwargs, separators=(',', ':'), default=list), timeout=self.timeout)
         elif http_method == 'post':
-            r = requests.post(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
+            r = requests.post(url, data=json.dumps(kwargs, separators=(',', ':'), default=list), timeout=self.timeout)
         elif http_method == 'delete':
             r = requests.delete(url, timeout=self.timeout)
         else:
