@@ -43,42 +43,95 @@ First, let's create a Bridge, which will be your top-level Resource.
 You can see the URL of any Resource:
 
     # This should give you something familiar from the API docs:
-    print b.url
+    print(b.url)
 
-By requesting most other attributes of a Resource object, you will construct a new Resource with the attribute name added to the URL of the original one:
+By requesting most *other* attributes of a Resource object, you will construct a new Resource with the attribute name added to the URL of the original one:
 
     lights = b.lights   # Creates a new Resource with its own URL
-    print lights.url    # Should have '/lights' on the end
+    print(lights.url)    # Should have '/lights' on the end
 
-Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't communicated with it yet.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
+Or, to show it another way, here's what these look like on my system:
+
+    >>> b.url
+    'http://192.168.0.45/api/sQCpOqFjZT1uYlFa2TNKXFbX0RZ6OhBjlYeUo-8F'
+    >>> b.lights.url
+    'http://192.168.0.45/api/sQCpOqFjZT1uYlFa2TNKXFbX0RZ6OhBjlYeUo-8F/lights'
+
+Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't communicated with it yet.  So far, it's just a way of constructing URLs, and you can construct ones which wouldn't actually do anything for you if you tried to use them!
+
+     # Not actually included with my bridge, but I can still get a URL for it:
+    >>> b.phaser_bank.url  
+    'http://192.168.0.45/api/sQCpOqFjZT1uYlFa2TNKXFbX0RZ6OhDjlYeUo-8F/phaser_bank'
+
+OK, so we can create Resources which have URLs.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
     # Let's actually call the API and print the results
-    print lights()
+    print(b.lights())
 
 Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily, for example:
 
     # Get the bridge's configuration info as a dict,
     # and print the ethernet MAC address
-    print b.config()['mac']
+    print(b.config()['mac'])
 
-Now, ideally, we'd like to be able to construct all of our URLs the same way, so we would refer to light 1 as `b.lights.1`, for example, but you can't use numbers as attribute names in Python.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
+So we've seen that you can call `b.lights()` and `b.config()`. What other calls can you make to the bridge?
+
+Well, you can actually call the bridge itself, and you get back a great big dictionary with everything in it.  It's a bit slow, so if you know what you want, it's better to focus on that specific call.  But by looking at the keys of that dictionary, you can see what the top-level groups are:
+
+    >>> for k in b(): print(k)
+    lights
+    groups
+    config
+    schedules
+    scenes
+    rules
+    sensors
+    resourcelinks
+
+and you can explore within these lower levels too:
+
+    >>> for k in b.sensors(): print (k)
+    1
+    2
+    4
+    5
+    8
+    ...
+
+OK, let's think about URLs again.
+
+Ideally, we'd like to be able to construct all of our URLs the same way we did above, so we would refer to light 1 as `b.lights.1`, for example. But this bumps up against a limitation of Python: you can't use numbers as attribute names.  Nor can you use variables.  So we couldn't get light *n* by requesting `b.lights.n`.
+
+As an alternative, therefore, Qhue will also let you use dictionary key syntax - for example, `b.lights[1]` or `b.lights[n]`.
 
     # Get information about light 1
-    print b.lights[1]()
+    print(b.lights[1]())
 
     # or, to do the same thing another way:
-    print b['lights'][1]()
+    print(b['lights'][1]())
 
 Alternatively, when you *call* a resource, you can give it arguments, which will be added to its URL when making the call:
 
     # This is the same as the last examples:
-    print b('lights', 1)
+    print(b('lights', 1))
 
 So there are several ways to express the same thing, and you can choose the one which fits most elegantly into your code.
 
+Here's another example, and instead of lights, we'll use sensors (switches, motion sensors etc). This one-liner will tell you where people are moving about:
+
+    >>> [s['name'] for s in b.sensors().values() if s['state'].get('presence')]
+    ["Quentin's study", "Hall", "Kitchen"]
+
+Let's explain that, by way of revision: 
+
+`b.sensors` is a Resource representing your sensors, so `b.sensors()` will make an API call and get back a dict of information about all your sensors, indexed by their ID.  We don't care about the ID keys here, so we use `b.sensors().values()` to get a list containing just the data about each sensor.
+
+Each item in this list is a dict which will include a 'name' and a 'state', and if the state includes a 'presence' with a true value, then it is a motion sensor which is detecting movement.
+
+
 ### Making changes
 
-Now, to make a change to a value, you also call the resource, but you add keyword arguments to specify the properties you want to change.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
+Now, to make a change to a value, such as the brightness of a bulb, you also call the resource, but you add keyword arguments to specify the properties you want to change.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
 
     b.lights[1].state(bri=128, hue=9000)
 
@@ -97,7 +150,9 @@ As a more complex example, if you want to set the brightness and colour temperat
 
     bridge.scenes[scene].lightstates[light](on=True, bri=bri, ct=ct)
 
-This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will be a PUT, and will change the current status.
+The above examples cover most simple cases.  
+
+**If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will become a PUT, and it will change the current status.**
 
 Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
 
@@ -131,7 +186,7 @@ And, at present, that's about it.
 * Some of the requests can return large amounts of information.  A handy way to make it more readable is to format it as YAML.  You may need to `pip install PyYAML`, then try the following:
 
         import yaml  
-        print(yaml.safe_dump(bridge.groups(), indent=4))
+        print(yaml.safe_dump(b.groups(), indent=4))
 
 * The Bridge generally returns items in a reasonably logical order. The order is not actually important, but if you wish to preserve it, then you probably *don't* want the JSON structures turned into Python dicts, since these do not generally preserve ordering.  When you construct the Bridge object, you can tell it to use another function to turn JSON dictionaries into Python structures, for example by specifying `object_pairs_hook=collections.OrderedDict`. This will give you OrderedDicts instead of dicts, which is a benefit in almost every way, except that any YAML output you create from it won't look so nice.
 
@@ -177,7 +232,7 @@ Suggestions, patches, pull requests welcome.  There are many ways this could be 
 
 If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
 
-Many thanks to David Coles, Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner, Matthew Clapp, Marcus Klaas de Vries and Richard Morrison, amongst others, for their contributions!
+Many thanks to Sander Johansson, Travis Evans, David Coles, Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner, Matthew Clapp, Marcus Klaas de Vries and Richard Morrison, amongst others, for their contributions!
 
 [Quentin Stafford-Fraser](http://quentinsf.com)
 
