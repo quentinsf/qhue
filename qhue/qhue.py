@@ -26,8 +26,9 @@ class Resource(object):
     When you call a Resource, you are making a request to that URL with some
     parameters.
     """
-    def __init__(self, url, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
+    def __init__(self, url, session, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
         self.url = url
+        self.session = session
         self.address = url[url.find("/api"):]
         # Also find the bit after the username, if there is one
         self.short_address = None
@@ -50,13 +51,13 @@ class Resource(object):
         # or with the specially-handled keyword "http_method".
         kwargs = {(k[:-1] if k.endswith("_") else k): v for k, v in kwargs.items()}
         if http_method == "put":
-            r = requests.put(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
+            r = self.session.put(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
         elif http_method == "post":
-            r = requests.post(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
+            r = self.session.post(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
         elif http_method == "delete":
-            r = requests.delete(url, timeout=self.timeout)
+            r = self.session.delete(url, timeout=self.timeout)
         else:
-            r = requests.get(url, timeout=self.timeout)
+            r = self.session.get(url, timeout=self.timeout)
         if r.status_code != 200:
             raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
         resp = r.json(object_pairs_hook=self.object_pairs_hook)
@@ -69,6 +70,7 @@ class Resource(object):
     def __getattr__(self, name):
         return Resource(
             self.url + "/" + str(name),
+            self.session,
             timeout=self.timeout,
             object_pairs_hook=self.object_pairs_hook,
         )
@@ -76,7 +78,7 @@ class Resource(object):
     __getitem__ = __getattr__
 
 
-def _api_url(ip, username=None):
+def _local_api_url(ip, username=None):
     if username is None:
         return "http://{}/api".format(ip)
     else:
@@ -95,7 +97,7 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
         QhueException if something went wrong with username generation (for
             example, if the bridge button wasn't pressed).
     """
-    res = Resource(_api_url(ip), timeout)
+    res = Resource(_local_api_url(ip), timeout)
     prompt = "Press the Bridge button, then press Return: "
     input(prompt)
 
@@ -131,8 +133,9 @@ class Bridge(Resource):
         """
         self.ip = ip
         self.username = username
-        url = _api_url(ip, username)
-        super(Bridge, self).__init__(url, timeout=timeout, object_pairs_hook=object_pairs_hook)
+        self.session = requests.Session()
+        url = _local_api_url(ip, username)
+        super().__init__(url, self.session, timeout=timeout, object_pairs_hook=object_pairs_hook)
 
 
 class QhueException(Exception):
