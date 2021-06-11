@@ -1,6 +1,8 @@
 # Qhue change log
 
-By its very nature, the core of Qhue doesn't change very much!  Most recent updates are primarily about documentation.
+## Next release
+
+Expects Python 3.
 
 ## 1.0.12 - 2019-01-04
 
@@ -8,7 +10,7 @@ By its very nature, the core of Qhue doesn't change very much!  Most recent upda
 
 ## 1.0.11 - 2019-01-04
 
-* If keyword argument names end with an underscore, it is removed before sending to the Bridge.  This means you can use, for example, 'class_', and not clash with Python keywords. 
+* If keyword argument names end with an underscore, it is removed before sending to the Bridge.  This means you can use, for example, 'class_', and not clash with Python keywords.
 
 ## 1.0.10 - 2018-11-15
 
@@ -34,10 +36,8 @@ By its very nature, the core of Qhue doesn't change very much!  Most recent upda
 * README updates
 * Addition of short_address attribute
 
-## 1.0.5 - 2016-11-16 
+## 1.0.5 - 2016-11-16
 
 * Updates to documentation
 * Inclusion of an example iPython Notebook
-
-
 

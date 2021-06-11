@@ -1,26 +1,37 @@
-# Qhue is (c) Quentin Stafford-Fraser 2017
+# Qhue is (c) Quentin Stafford-Fraser 2021
 # but distributed under the GPL v2.
+# It expects Python v3.
 
-import requests
+import re
 import json
+
 # for hostname retrieval for registering with the bridge
 from socket import getfqdn
-import re
-import sys
 
-__all__ = ('Bridge', 'QhueException', 'create_new_username')
+import requests
+
+__all__ = ("Bridge", "QhueException", "create_new_username")
 
 # default timeout in seconds
 _DEFAULT_TIMEOUT = 5
 
 
 class Resource(object):
+    """
+    A Resource represents an object or collection of objects in the Hue world,
+    such as a light or a group of lights.
+    It encapsulates an API method that can be called to examine or modify
+    those objects, and makes it easy to construct the URLs needed.
+    When you create a Resource, you are building a URL.
+    When you call a Resource, you are making a request to that URL with some
+    parameters.
+    """
     def __init__(self, url, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
         self.url = url
-        self.address = url[url.find('/api'):]
+        self.address = url[url.find("/api"):]
         # Also find the bit after the username, if there is one
         self.short_address = None
-        post_username_match = re.search(r'/api/[^/]*(.*)', url)
+        post_username_match = re.search(r"/api/[^/]*(.*)", url)
         if post_username_match is not None:
             self.short_address = post_username_match.group(1)
         self.timeout = timeout
@@ -31,19 +42,18 @@ class Resource(object):
         url = self.url
         for a in args:
             url += "/" + str(a)
-        http_method = kwargs.pop('http_method',
-            'get' if not kwargs else 'put').lower()
+        http_method = kwargs.pop("http_method", "get" if not kwargs else "put").lower()
 
         # From each keyword, strip one trailing underscore if it exists,
         # then send them as parameters to the bridge. This allows for
         # "escaping" of keywords that might conflict with Python syntax
         # or with the specially-handled keyword "http_method".
-        kwargs = {(k[:-1] if k.endswith('_') else k): v for k, v in kwargs.items()}
-        if http_method == 'put':
+        kwargs = {(k[:-1] if k.endswith("_") else k): v for k, v in kwargs.items()}
+        if http_method == "put":
             r = requests.put(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
-        elif http_method == 'post':
+        elif http_method == "post":
             r = requests.post(url, data=json.dumps(kwargs, default=list), timeout=self.timeout)
-        elif http_method == 'delete':
+        elif http_method == "delete":
             r = requests.delete(url, timeout=self.timeout)
         else:
             r = requests.get(url, timeout=self.timeout)
@@ -51,14 +61,17 @@ class Resource(object):
             raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
         resp = r.json(object_pairs_hook=self.object_pairs_hook)
         if type(resp) == list:
-            errors = [m['error']['description'] for m in resp if 'error' in m]
+            errors = [m["error"]["description"] for m in resp if "error" in m]
             if errors:
                 raise QhueException("\n".join(errors))
         return resp
 
     def __getattr__(self, name):
-        return Resource(self.url + "/" + str(name), timeout=self.timeout,
-                object_pairs_hook=self.object_pairs_hook)
+        return Resource(
+            self.url + "/" + str(name),
+            timeout=self.timeout,
+            object_pairs_hook=self.object_pairs_hook,
+        )
 
     __getitem__ = __getattr__
 
@@ -84,11 +97,7 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
     """
     res = Resource(_api_url(ip), timeout)
     prompt = "Press the Bridge button, then press Return: "
-    # Deal with one of the sillier python3 changes
-    if sys.version_info.major == 2:
-        _ = raw_input(prompt)
-    else:
-        _ = input(prompt)
+    input(prompt)
 
     if devicetype is None:
         devicetype = "qhue#{}".format(getfqdn())
@@ -100,7 +109,12 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
 
 
 class Bridge(Resource):
-
+    """
+    A Bridge is a Resource that represents the top-level connection to a
+    Philips Hue Bridge (or 'Hub').
+    It is the basis for building other Resources that represent the things
+    managed by that Bridge.
+    """
     def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
         """Create a new connection to a hue bridge.
 

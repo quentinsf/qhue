@@ -6,7 +6,7 @@ I wrote it because some of the other (excellent) frameworks out there weren't qu
 
 ## Understanding Qhue
 
-Philips, to their credit, created a beautiful RESTful API for the Hue system.  It may not yet have all the features we'd like, but what does exist is very elegantly designed.  
+Philips, to their credit, created a beautiful RESTful API for the Hue system, documented it and made it available from very early on.   If only more manufacturers follwed their example!
 
 You can (and should) read [the full documentation here](http://www.developers.meethue.com/philips-hue-api), but a quick summary is that resources like lights, scenes and so forth each have a URL, that might look like this:
 
@@ -24,13 +24,15 @@ That's easy.
 
     pip install qhue
 
-You may want to check [GitHub](https://github.com/quentinsf/qhue) for the  latest version of the module, and of this documentation.  The very latest code is likely to be on [the 'develop' branch](https://github.com/quentinsf/qhue/tree/develop).
+You may want to check [GitHub](https://github.com/quentinsf/qhue) for the latest version of the module, and of this documentation.  The very latest code is likely to be on [the 'develop' branch](https://github.com/quentinsf/qhue/tree/develop).
+
+Please note that Qhue, from version 2.0 onwards, expects Python 3 or later.  If you still need to support Python 2, you should use an earlier version of Qhue.
 
 ## Examples
 
 Note: These examples assume you know the IP address of your bridge.  See [the 'Getting Started' section of the API docs](http://www.developers.meethue.com/documentation/getting-started) if you need help in finding it.  I've assigned mine a static address of 192.168.0.45, so that's what you'll see below.
 
-They also assume you have experimented with the API before, and so have a user account set up on the bridge, and the username stored somewhere.  If not, see the section below entitled 'Creating a user'.
+They also assume you have experimented with the API before, and so have a user account set up on the bridge, and the username stored somewhere.  This is easy to do, but you will need to read the section below entitled 'Creating a user' before actually trying any of the following.
 
 OK.  Now those preliminaries are out of the way...
 
@@ -43,36 +45,37 @@ First, let's create a Bridge, which will be your top-level Resource.
 You can see the URL of any Resource:
 
     # This should give you something familiar from the API docs:
-    print b.url
+    # the base URL for API calls to your Bridge.
+    print(b.url)
 
 By requesting most other attributes of a Resource object, you will construct a new Resource with the attribute name added to the URL of the original one:
 
     lights = b.lights   # Creates a new Resource with its own URL
-    print lights.url    # Should have '/lights' on the end
+    print(lights.url)   # Should have '/lights' on the end
 
-Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't communicated with it yet.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
+Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't actually communicated with it yet.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
     # Let's actually call the API and print the results
-    print lights()
+    print(lights())
 
 Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily, for example:
 
     # Get the bridge's configuration info as a dict,
     # and print the ethernet MAC address
-    print b.config()['mac']
+    print(b.config()['mac'])
 
 Now, ideally, we'd like to be able to construct all of our URLs the same way, so we would refer to light 1 as `b.lights.1`, for example, but you can't use numbers as attribute names in Python.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
 
     # Get information about light 1
-    print b.lights[1]()
+    print(b.lights[1]())
 
     # or, to do the same thing another way:
-    print b['lights'][1]()
+    print(b['lights'][1]())
 
 Alternatively, when you *call* a resource, you can give it arguments, which will be added to its URL when making the call:
 
     # This is the same as the last examples:
-    print b('lights', 1)
+    print(b('lights', 1))
 
 So there are several ways to express the same thing, and you can choose the one which fits most elegantly into your code.
 
@@ -126,7 +129,7 @@ See the API docs for more information about when you need this.
 And, at present, that's about it.
 
 
-## A couple of hints:
+## A couple of hints
 
 * Some of the requests can return large amounts of information.  A handy way to make it more readable is to format it as YAML.  You may need to `pip install PyYAML`, then try the following:
 
