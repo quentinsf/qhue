@@ -81,8 +81,7 @@ class Resource(object):
 def _local_api_url(ip, username=None):
     if username is None:
         return "http://{}/api".format(ip)
-    else:
-        return "http://{}/api/{}".format(ip, username)
+    return "http://{}/api/{}".format(ip, username)
 
 
 def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
@@ -118,7 +117,8 @@ class Bridge(Resource):
     managed by that Bridge.
     """
     def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
-        """Create a new connection to a hue bridge.
+        """
+        Create a new connection to a hue bridge.
 
         If a whitelisted username has not been generated yet, use
         create_new_username to have the bridge interactively generate
@@ -133,8 +133,8 @@ class Bridge(Resource):
         """
         self.ip = ip
         self.username = username
-        self.session = requests.Session()
         url = _local_api_url(ip, username)
+        self.session = requests.Session()
         super().__init__(url, self.session, timeout=timeout, object_pairs_hook=object_pairs_hook)
 
 

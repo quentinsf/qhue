@@ -19,5 +19,5 @@ setup(
     url="https://github.com/quentinsf/qhue",
     license="GNU GPL 2",
     packages=("qhue",),
-    install_requires=("requests",),
+    install_requires=("requests", "requests_oauthlib"),
 )
