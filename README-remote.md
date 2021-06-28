@@ -127,4 +127,7 @@ print(b.lights())
 
 ## Notes
 
-If you don't want Qhue to try opening your browser for you to do the authentication -- something that only makes sense anyway if it's running on your local machine -- you can specify `open_browser=False` when calling the `authorize` method.
+If you don't want Qhue to try opening your browser for you to do the authentication -- something that only makes sense anyway if it's running on your local machine -- you can specify `open_browser=False` when calling the `authorize` method and it will then print out the URL you need to open.
+
+If you don't want to run a local server for receiving the credentials back, you can specify `use_local_server=False` (or omit it completely) and `authorize` will then prompt you on the command line to paste in the Callback URL with its arguments.
+
