@@ -1,4 +1,4 @@
-# Access to the Hue Hub when using the remote API 
+# Access to the Hue Hub when using the remote API
 # via the Philips servers.
 #
 # Qhue is (c) Quentin Stafford-Fraser 2021
@@ -8,8 +8,9 @@
 import webbrowser
 import requests
 from requests_oauthlib import OAuth2Session
+from typing import Optional
 
-from .qhue import Bridge, Resource, _DEFAULT_TIMEOUT
+from .qhue import Resource, _DEFAULT_TIMEOUT
 from .oauth_receiver import TokenCollector
 
 # Remote API root URL for use if outside the LAN
@@ -23,7 +24,7 @@ OAUTH_REFRESH_URL = OAUTH_TOKEN_URL
 def _remote_api_url(username):
     # The username is sometimes called a 'whitelist entry'
     # in the API docs.
-    # We aren't yet dealing with the situation where you
+    # TODO: We aren't yet dealing with the situation where you
     # don't have the username but are remote.
     return "{}/{}".format(REMOTE_API_BASE, username)
 
@@ -36,7 +37,7 @@ class RemoteBridge(Resource):
     managed by that Bridge.
     It is similar to a bridge, but uses OAuth authentication to the Philips server.
     """
-    def __init__(self, username, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
+    def __init__(self, username: str, timeout: float = _DEFAULT_TIMEOUT, object_pairs_hook=None):
         """
         Create a new connection to a remote Hue bridge.
         The 'username' is the same as for a local bridge -
@@ -48,16 +49,27 @@ class RemoteBridge(Resource):
         url = _remote_api_url(username)
         super().__init__(url, self.session, timeout=timeout, object_pairs_hook=object_pairs_hook)
 
-    def authorize(self, client_id, client_secret, open_browser: bool = True, use_local_server: bool = False):
+    def authorize(
+        self,
+        client_id: str,
+        client_secret: str,
+        token: Optional[str] = None,
+        open_browser: bool = True,
+        use_local_server: bool = False
+    ):
         """
         Open a browser to the Hue site to ask you to authorise remote access.
+        An existing token can be passed if available, otheriwse authorization will be needed:
         If open_browser is True, python will try to open your browser to the necessary URL,
         otherwise it will just print it out.
         Once authorised, this redirects to an HTTPS address, passing the required token.
 
+        TODO: We don't currently refresh tokens.
         """
         # Use an oauth session in place of a standard requests session.
-        self.session = OAuth2Session(client_id)
+        self.session = OAuth2Session(client_id, token=token)
+        if token is not None:
+            return token
         authorization_url, state = self.session.authorization_url(OAUTH_AUTHORIZE_URL)
         if open_browser:
             print("Opening a browser to take you to", authorization_url)
@@ -68,14 +80,13 @@ class RemoteBridge(Resource):
         if use_local_server:
             c = TokenCollector()
             redirect_response = c.get_single_request()
-            
+
         else:
             redirect_response = input('Paste the full redirect URL here:')
 
         print("redirect response is ", redirect_response)
 
-        self.session.fetch_token(
+        return self.session.fetch_token(
             OAUTH_TOKEN_URL,
             client_secret=client_secret,
             authorization_response=redirect_response)
-

@@ -24,6 +24,10 @@ That's easy.
 
     pip install qhue
 
+or, more correctly these days:
+
+    python3 -m pip install qhue
+
 You may want to check [GitHub](https://github.com/quentinsf/qhue) for the latest version of the module, and of this documentation.  The very latest code is likely to be on [the 'develop' branch](https://github.com/quentinsf/qhue/tree/develop).
 
 Please note that Qhue, from version 2.0 onwards, expects Python 3 or later.  If you still need to support Python 2, you should use an earlier version of Qhue.
@@ -168,6 +172,12 @@ This works under Python 2 and Python 3.  It uses Kenneth Reitz's excellent [requ
 
 or something similar before using Qhue.  If you installed Qhue itself using pip, this shouldn't be necessary.
 
+
+## Remote access
+
+Starting with version 2, Qhue has a wrapper to support remote access: interacting with your Hue hub via the Philips servers when you are at a remote location, in the same way that a phone app might do when you are away from home.
+
+For more information see [[README-remote.md]].
 
 ## Licence
 

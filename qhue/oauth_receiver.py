@@ -3,7 +3,7 @@
 # When you want to grant a piece of software access to an API, you often need to
 # open a web browser, go to that API, authorise the access, and you are then
 # redirected to a new URL with the appropriate access token passed in the
-# request. 
+# request.
 #
 # This works fine for web apps, but command-line ones won't normally be
 # exposing a URL to which OAuth can redirect. So we run a simple server that
@@ -56,7 +56,6 @@ class TokenHandler(BaseHTTPRequestHandler):
     """
     def do_GET(self):
         self.server.save_request(self.path)
-        print(self.path)
         self.send_response(200)
         self.send_header('Content-type', 'text/plain')
         self.end_headers()

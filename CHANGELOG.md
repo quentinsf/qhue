@@ -1,8 +1,9 @@
 # Qhue change log
 
-## Next release
+## 2.0
 
-Expects Python 3.
+* Requires Python 3.
+* Offers remote access to bridge if not on the LAN.
 
 ## 1.0.12 - 2019-01-04
 
