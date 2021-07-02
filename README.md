@@ -42,44 +42,58 @@ OK.  Now those preliminaries are out of the way...
 
 First, let's create a Bridge, which will be your top-level Resource.
 
+```python
     # Connect to the bridge with a particular username
     from qhue import Bridge
     b = Bridge("192.168.0.45", username)
+```
 
 You can see the URL of any Resource:
 
+```python
     # This should give you something familiar from the API docs:
     # the base URL for API calls to your Bridge.
     print(b.url)
+```
 
 By requesting most other attributes of a Resource object, you will construct a new Resource with the attribute name added to the URL of the original one:
 
+```python
     lights = b.lights   # Creates a new Resource with its own URL
     print(lights.url)   # Should have '/lights' on the end
+```
 
 Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't actually communicated with it yet.  To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
+```python
     # Let's actually call the API and print the results
     print(lights())
+```
 
 Qhue takes the JSON that is returned by the API and turns it back into Python objects, typically a dictionary, so you can access its parts easily, for example:
 
+```python
     # Get the bridge's configuration info as a dict,
     # and print the ethernet MAC address
     print(b.config()['mac'])
+```
 
 Now, ideally, we'd like to be able to construct all of our URLs the same way, so we would refer to light 1 as `b.lights.1`, for example, but you can't use numbers as attribute names in Python.  Nor can you use variables.  As an alternative, therefore, you can use dictionary key syntax - for example, `b.lights[1]`.
 
+```python
     # Get information about light 1
     print(b.lights[1]())
 
     # or, to do the same thing another way:
     print(b['lights'][1]())
+```
 
 Alternatively, when you *call* a resource, you can give it arguments, which will be added to its URL when making the call:
 
+```python
     # This is the same as the last examples:
     print(b('lights', 1))
+```
 
 So there are several ways to express the same thing, and you can choose the one which fits most elegantly into your code.
 
@@ -87,46 +101,59 @@ So there are several ways to express the same thing, and you can choose the one 
 
 Now, to make a change to a value, you also call the resource, but you add keyword arguments to specify the properties you want to change.  You can change the brightness and hue of a light by setting properties on its *state*, for example:
 
+```python
     b.lights[1].state(bri=128, hue=9000)
+```
 
 and you can mix URL-constructing positional arguments with value-setting keyword arguments, if you like:
 
+```python
     # Positional arguments are added to the URL.
     # Keyword arguments change values.
     # So these are equivalent to the previous example:
 
     b.lights(1, 'state', bri=128, hue=9000)
     b('lights', 1, 'state', bri=128, hue=9000)
+```
 
 When you need to specify boolean true/false values, you should use the native Python True and False.
 
 As a more complex example, if you want to set the brightness and colour temperature of a light in a given scene, you might use a call like this:
 
+```python
     bridge.scenes[scene].lightstates[light](on=True, bri=bri, ct=ct)
+```
 
 This covers most simple cases.  If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will be a PUT, and will change the current status.
 
 Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
 
+```python
     # Delete rule 1
     b('rules', 1, http_method='delete')
+```
 
 If you need to specify a keyword argument that would conflict with a Python keyword, such as `class`, simply append an underscore to it, like this:
 
+
+```python
     # Set property "class" to "Hallway".
     # The trailing underscore will automatically be removed
     # in the property name sent to the bridge.
 
     b.groups[19](class_='Hallway')
+```
 
 Finally, for certain operations, like schedules and rules, you'll want to know the 'address' of a resource, which is the absolute URL path - the bit after the IP address, or, more recently, the bit after the username.  You can get these with the `address` and `short_address` attributes:
 
+```python
     >>> b.groups[1].url
     'http://192.168.0.45/api/ac594202624a7211ac44615430a461/groups/1'
     >>> b.groups[1].address
     '/api/ac594202624a7211ac44615430a461/groups/1'
     >>> b.groups[1].short_address
     '/groups/1'
+```
 
 See the API docs for more information about when you need this.
 
@@ -137,8 +164,10 @@ And, at present, that's about it.
 
 * Some of the requests can return large amounts of information.  A handy way to make it more readable is to format it as YAML.  You may need to `pip install PyYAML`, then try the following:
 
-        import yaml  
-        print(yaml.safe_dump(bridge.groups(), indent=4))
+```python
+    import yaml  
+    print(yaml.safe_dump(bridge.groups(), indent=4))
+```
 
 * The Bridge generally returns items in a reasonably logical order. The order is not actually important, but if you wish to preserve it, then you probably *don't* want the JSON structures turned into Python dicts, since these do not generally preserve ordering.  When you construct the Bridge object, you can tell it to use another function to turn JSON dictionaries into Python structures, for example by specifying `object_pairs_hook=collections.OrderedDict`. This will give you OrderedDicts instead of dicts, which is a benefit in almost every way, except that any YAML output you create from it won't look so nice.
 
@@ -149,8 +178,10 @@ And, at present, that's about it.
 
 If you haven't used the API before, you'll need to create a user account on the bridge.
 
+```python
     from qhue import create_new_username
     username = create_new_username("192.168.0.45")
+```
 
 You'll get a prompt saying that the link button on the bridge needs to be pressed.  Go and press it, and you should get a generated username. You can now get a new Bridge object as shown in the examples above, passing this username as the second argument.
 
