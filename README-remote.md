@@ -4,44 +4,51 @@ Please make sure you're familiar with the main [README](README.md) before contin
 
 Qhue is a handy way to interact with a Hue lighting system on your own network.  But suppose you wish to run Qhue-based software from somewhere else?  After all, the Hue app on your phone works when you're away from home, if you've enabled 'Out-of-home control' on your bridge.  Could your Python code do the same thing?
 
-Remote access depends on you being authenticated bia the Philips servers, and the good news is that, as ever, Philips have done [a good job in documenting this](https://developers.meethue.com/develop/hue-api/remote-api-quick-start-guide/).  
+Remote access depends on you being authenticated via the Philips servers, and the good news is that, as ever, Philips have done [a good job in documenting this](https://developers.meethue.com/develop/hue-api/remote-api-quick-start-guide/).
 
-Qhue version 2.0 and later includes a wrapper in the `qhue_remote.py` file to make this easy.  This functionality has  deliberately been put in a separate file, partly to keep the main `qhue.py` nice and clean for those who don't need it, but also because this is only a first version. Suggestions for improvements are welcome, or you may want to use qhue_remote just as an example for your own code.
+Qhue version 2.0 and later includes a wrapper in the `qhue_remote.py` file to make this process easy.  This functionality has  deliberately been put in a separate file, partly to keep the main `qhue.py` nice and clean for those who don't need the remote aspects, but also because this is only a first version. Suggestions for improvements are welcome, or you may want to use qhue_remote just as an example for your own code.
 
 
 ## What's needed for remote access?
 
-* You should get a username from the bridge as described in the main [README](README.md).  It's possible to do this remotely, but we haven't implemented that yet.  Save the username somewhere: you'll need it later.  In the remote access documentation this username is also known as a 'whitelist identifier': they're basically the same thing, and typically a 40-character string.
+* You should get a username from the bridge as described in the main [README](README.md).  It's possible to do this remotely, but we haven't implemented that yet.  Save the username somewhere: you'll need it later.  In the remote access documentation this username is also known as a 'whitelist identifier' -- they're basically the same thing -- and it will typically be a 40-character string.
 
 * You'll need the 'Out-of-home control' option turned on for your bridge.  In the Hue app, go to *Settings > Hue Bridges > your bridge* and check that it's enabled.
 
-* You'll need a free [Hue developer's account](https://developers.meethue.com), which, as well as giving you access to all the relevant documentation,  will allow you to register your app on the [My Apps page](https://developers.meethue.com/my-apps/).  This will give you a 'ClientId' and a 'ClientSecret' that represent your app.
+* You'll need a free [Hue developer's account](https://developers.meethue.com). As well as giving you access to all the relevant documentation,  this will allow you to register your app on the [My Apps page](https://developers.meethue.com/my-apps/).  This will give you a 'ClientId' and a 'ClientSecret' that represent your app.
 
 * Remote access is authenticated via the widely-used OAuth 2 system.  The Hue-specific details are documented [here](https://developers.meethue.com/develop/hue-api/remote-authentication-oauth/).  We use Kenneth Reitz's excellent [requests-oauthlib](https://requests-oauthlib.readthedocs.io) library for Python, which is much nicer than doing it all ourselves.  We'll come back to how the authorisation works in a minute.
 
 ## What does it look like?
 
-If you were using Qhue on your local network, you might make the initial connection to your bridge as follows:
+If you were using Qhue on your *local* network, you might make the initial connection to your bridge as follows:
 
+```python
     from qhue import Bridge
     b = Bridge("192.168.0.45", username)
+```
 
 To make a remote connection, you would do the following instead:
 
+```python
     from qhue import RemoteBridge
     b = RemoteBridge(username)
     token = b.authorize(app_client_id, app_client_secret)
+```
 
-Once the authorisation process has completed, you can use the Bridge reference `b` in just the same way as if it were local.  If you save the token you got back from the `authorize()` method, you can use it next time to save having to authorise manually again:
+Once the authorisation process has completed, you can use the Bridge reference `b` in just the same way as if it were local.
 
+If you save the token you got back from the `authorize()` method, you can use it next time to avoid authorising manually again:
+
+```python
     token = b.authorize(app_client_id, app_client_secret, token=token)
-
+```
 
 ## How does the authorisation work?
 
-The OAuth2 procedure is commonly used between two web services, e.g. to allow a plugin on your blog to have access to your Twitter feed.  In that scenario, the plugin would send you to Twitter,  you would approve the request for access to your tweets, and you would then be redirected back to the plugin via a 'Callback URL' that included the necessary credentials.  
+The OAuth2 procedure is commonly used between two web services, e.g. to allow a plugin on your blog to have access to your Twitter feed.  In that scenario, the plugin would send you to Twitter,  you would approve the request for access to your tweets, and you would then be redirected back to your blog site via a 'Callback URL' that included the necessary credentials for the plugin to use.
 
-The same thing happens here: when you go to the Hue Developers' Site to register your app, as mentioned above, you need to specify what this 'Callback URL' will be.   Then when you make the `b.authorize()` call, it will open your browser on the necessary Philips web page for you to authorise access for your app, and then redirect you to your Callback URL with the appropriate authorisation information.
+The same thing happens here: when you go to the Hue Developers' Site to register your app, as mentioned above, you need to specify what this 'Callback URL' will be.   Then when you make the `b.authorize()` call, it will open your browser on the necessary Philips web page, you can authorise your app, and it will redirect you to your Callback URL with the appropriate authorisation information.
 
 But what if you're using Qhue as part of a command-line application, or something else that can't easily listen on a URL for the credentials that will be sent back?
 
@@ -59,25 +66,23 @@ You can set the Callback URL to pretty much anything that handles HTTPS.  For ex
 Google won't know what to do with that, but it doesn't matter:  it's the bit beginning `?pkce...` that contains the necessary info.  You just need to copy the entire URL (including https://) from your browser address bar and paste it into the prompt that QHue gives you.
 
 
-### Option 2: Redirect to a local URL
+### Option 2: Redirecting to a local URL
 
-When you call `b.authorize()`, you can add an argument of `use_local_server=True`.  Qhue will then run a small local webserver on your machine, which listens on port 8584, and on the Hue website you can specify the callback URL for your app as `https://localhost:8584`.  This little server (see `oauth_receiver.py` for the code) will just listen for one connection: when your browser comes in with the credentials in a URL like this:
+When you call `b.authorize()`, you can add an argument of `use_local_server=True`.  Qhue will then run a small local webserver on your machine, which listens on port 8584, and on the Hue website you can specify the callback URL for your app as `https://localhost:8584`.  This little server (defined in `oauth_receiver.py`) will just listen for one connection.  When your browser comes in with the credentials in a URL like this:
 
-`https://localhost:8584/?pkce=0&code=mod6jErp&state=NzLj5g6PQggn9cXpvDpZSD9OiahfmB`
+`https://localhost:8584/?pkce=0&code=mod6jErp&state=NzLj5g6PQggn9cXpvDpZSD9OiahfmB`,
 
-after which it will close down and hand the information on to Qhue.  Neat, eh?
+it will close down and hand that information on to Qhue.  Neat, eh?
 
-Yes... except there's a complication.
+Yes... except there's a small complication.
 
 *OAuth 2 requires the Callback URL to be HTTPS, not HTTP.*  That means that this little server needs to have a certificate and private key to be able to serve up an HTTPS connection, and because it's a self-signed certificate, your browser will warn you and you'll need to authorize it to make the connection.
 
 You'll need to generate the certificate and key.  It will look for them as files 'cert.pem' and 'key.pem' in the local directory, and you can create suitable files using:
 
 ```
-openssl req -x509 -nodes -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365
+openssl req -x509 -nodes -newkey rsa:2048 -subj '/CN=localhost' -keyout key.pem -out cert.pem -days 365
 ```
-
-and just press return for the defaults when you're prompted for them.
 
 
 ## Can you give me a more complete example?
@@ -113,7 +118,7 @@ else:
     # Otherwise, open a browser to authenticate and run a server to
     # receive the callback credentials.
     token = b.authorize(
-        CLIENT_ID, CLIENT_SECRET, 
+        CLIENT_ID, CLIENT_SECRET,
         open_browser=True, use_local_server=True
     )
     # Save the token for next time:
