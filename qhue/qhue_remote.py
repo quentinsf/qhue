@@ -23,7 +23,9 @@ OAUTH_REFRESH_URL = OAUTH_TOKEN_URL
 
 def _remote_api_url(username):
     # The username is sometimes called a 'whitelist entry'
-    # in the API docs.
+    # in the API docs. You can get one on your local LAN
+    # using the create_new_username function as described in the
+    # README.
     # TODO: We aren't yet dealing with the situation where you
     # don't have the username but are remote.
     return "{}/{}".format(REMOTE_API_BASE, username)
