@@ -1,4 +1,8 @@
 from setuptools import setup
+import sys
+
+if sys.version_info[0] == 2:
+    sys.exit("Sorry, Python 2 is no longer supported. Please use a version of Qhue < 2.0.")
 
 major_version = 2
 minor_version = 0
@@ -11,6 +15,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="qhue",
+    python_requires='>3.4',
     version=version,
     description="Qhue: python wrapper for Philips Hue API",
     long_description=long_description,
