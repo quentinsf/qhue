@@ -62,9 +62,18 @@ class Resource(object):
             raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
         resp = r.json(object_pairs_hook=self.object_pairs_hook)
         if type(resp) == list:
-            errors = [m["error"]["description"] for m in resp if "error" in m]
+            # In theory, you can get more than one error from a single call
+            # so they are returned as a list.
+            errors = [m["error"] for m in resp if "error" in m]
             if errors:
-                raise QhueException("\n".join(errors))
+                # In general, though, there will only be one error per call
+                # so we return the type and address of the first one in the 
+                # exception, to keep the exception type simple.
+                raise QhueException(
+                    message="\n".join(e["description"] for e in errors),
+                    type_id=errors[0]['type'], 
+                    address=errors[0]['address']
+                )
         return resp
 
     def __getattr__(self, name):
@@ -139,4 +148,7 @@ class Bridge(Resource):
 
 
 class QhueException(Exception):
-    pass
+    def __init__(self, message, type_id=None, address=None):
+        self.message = message
+        self.type_id = type_id
+        self.address = address

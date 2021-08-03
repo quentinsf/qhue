@@ -4,6 +4,7 @@
 
 * Requires Python 3.
 * Offers remote access to bridge if not on the LAN.
+* The QhueException, if thrown, contains the type and address info.
 
 ## 1.0.12 - 2019-01-04
 

@@ -1,4 +1,4 @@
-# Using QHue for Remote Access
+# Using Qhue for Remote Access
 
 Please make sure you're familiar with the main [README](README.md) before continuing!
 

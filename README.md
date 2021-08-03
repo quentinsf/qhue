@@ -173,6 +173,7 @@ And, at present, that's about it.
 
 * If you're familiar with the Jupyter (iPython) Notebook system, it can be a fun way to explore the API.  See the [Qhue Playground example notebook](Qhue%20playground.ipynb).
 
+* If there is an error, a `QhueException` will be raised.  If the error was returned from the API call as described in [the documentation](https://developers.meethue.com/develop/hue-api/error-messages/), it will have a type and address field as well as the human-readable message.
 
 ## Creating a user
 
@@ -197,7 +198,7 @@ An important example of this is that the bridge is expecting integer values for 
 
 ## Prerequisites
 
-This works under Python 2 and Python 3.  It uses Kenneth Reitz's excellent [requests](http://docs.python-requests.org/en/latest/) module, so you'll need to do:
+This requires Python 3.  It uses Kenneth Reitz's excellent [requests](http://docs.python-requests.org/en/latest/) module, so you'll need to do:
 
     pip install requests
 
