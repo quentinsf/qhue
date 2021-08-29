@@ -70,8 +70,8 @@ class Resource(object):
                 # so we return the type and address of the first one in the 
                 # exception, to keep the exception type simple.
                 raise QhueException(
-                    message="\n".join(e["description"] for e in errors),
-                    type_id=errors[0]['type'], 
+                    message=",".join(e["description"] for e in errors),
+                    type_id=",".join(e["type"] for e in errors),
                     address=errors[0]['address']
                 )
         return resp
