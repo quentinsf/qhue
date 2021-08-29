@@ -71,7 +71,7 @@ class Resource(object):
                 # exception, to keep the exception type simple.
                 raise QhueException(
                     message=",".join(e["description"] for e in errors),
-                    type_id=",".join(e["type"] for e in errors),
+                    type_id=",".join(str(e["type"]) for e in errors),
                     address=errors[0]['address']
                 )
         return resp
