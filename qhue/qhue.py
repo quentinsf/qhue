@@ -152,3 +152,8 @@ class QhueException(Exception):
         self.message = message
         self.type_id = type_id
         self.address = address
+
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'QhueException: {self.type_id} -> {self.message}'
