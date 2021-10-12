@@ -105,7 +105,8 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
         QhueException if something went wrong with username generation (for
             example, if the bridge button wasn't pressed).
     """
-    res = Resource(_local_api_url(ip), timeout)
+    session = requests.Session()
+    res = Resource(_local_api_url(ip), session, timeout)
     prompt = "Press the Bridge button, then press Return: "
     input(prompt)
 
