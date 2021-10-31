@@ -280,7 +280,7 @@ Suggestions, patches, pull requests welcome.  There are many ways this could be 
 
 If you can do so in a general way, without adding too many lines, that would be even better!  Brevity, as Polonius said, is the soul of wit.
 
-Many thanks to Sander Johansson, Travis Evans, David Coles, Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner, Matthew Clapp, Marcus Klaas de Vries and Richard Morrison, amongst others, for their contributions!
+Many thanks to John Bond, Sander Johansson, Travis Evans, David Coles, Chris Macklin, Andrea Jemmett, Martin Paulus, Ryan Turner, Matthew Clapp, Marcus Klaas de Vries and Richard Morrison, amongst others, for their contributions!
 
 [Quentin Stafford-Fraser](http://quentinsf.com)
 
