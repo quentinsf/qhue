@@ -1,5 +1,9 @@
 # Qhue change log
 
+## 2.0.1 - 2021-10-31
+
+* Fix issue with create_new_username
+
 ## 2.0
 
 * Now requires Python 3.

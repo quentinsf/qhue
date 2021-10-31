@@ -70,8 +70,8 @@ class Resource(object):
                 # so we return the type and address of the first one in the 
                 # exception, to keep the exception type simple.
                 raise QhueException(
-                    message="\n".join(e["description"] for e in errors),
-                    type_id=errors[0]['type'], 
+                    message=",".join(e["description"] for e in errors),
+                    type_id=",".join(str(e["type"]) for e in errors),
                     address=errors[0]['address']
                 )
         return resp
@@ -105,8 +105,7 @@ def create_new_username(ip, devicetype=None, timeout=_DEFAULT_TIMEOUT):
         QhueException if something went wrong with username generation (for
             example, if the bridge button wasn't pressed).
     """
-    session = requests.Session()
-    res = Resource(_local_api_url(ip), session, timeout)
+    res = Resource(_local_api_url(ip), requests.Session(), timeout)
     prompt = "Press the Bridge button, then press Return: "
     input(prompt)
 
@@ -153,3 +152,8 @@ class QhueException(Exception):
         self.message = message
         self.type_id = type_id
         self.address = address
+
+        super().__init__(self.message)
+
+    def __str__(self):
+        return f'QhueException: {self.type_id} -> {self.message}'
