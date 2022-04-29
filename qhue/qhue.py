@@ -86,6 +86,9 @@ class Resource(object):
 
     __getitem__ = __getattr__
 
+    def __iter__(self):
+        raise TypeError(f"'{type(self)}' object is not iterable")
+
 
 def _local_api_url(ip, username=None):
     if username is None:
