@@ -100,6 +100,30 @@ class Resource(object):
         """Resource class to create and return from __getattr__/__getitem__"""
         return Resource
 
+
+class Resource_APIv2(Resource):
+
+    _api_root = '/clip/v2'
+
+    def __call__(self, *args, **kwargs):
+        # FIXME: Temporarily disable insecure HTTPS warnings until
+        # proper certificate validation is implemented
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            return super().__call__(*args, **kwargs)
+
+    @property
+    def _resource_class(self):
+        return Resource_APIv2
+
+    def _short_address(self, url):
+        post_username_match = re.search(r"{}(.*)".format(re.escape(self._api_root)), url)
+        if post_username_match is not None:
+            return post_username_match.group(1)
+        return None
+
+
 def _local_api_url(ip, username=None):
     if username is None:
         return "http://{}/api".format(ip)
@@ -157,6 +181,18 @@ class Bridge(Resource):
         self.username = username
         url = _local_api_url(ip, username)
         self.session = requests.Session()
+        super().__init__(url, self.session, timeout=timeout, object_pairs_hook=object_pairs_hook)
+
+
+class Bridge_APIv2(Resource_APIv2):
+    def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
+        self.ip = ip
+        self.username = username
+        url = f'https://{ip}{self._api_root}'
+        self.session = requests.Session()
+        # FIXME: This does not do proper HTTPS certificate verification yet.
+        self.session.verify = False
+        self.session.headers.update({'hue-application-key': self.username})
         super().__init__(url, self.session, timeout=timeout, object_pairs_hook=object_pairs_hook)
 
 
