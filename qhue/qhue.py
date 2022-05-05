@@ -58,23 +58,7 @@ class Resource(object):
             r = self.session.delete(url, timeout=self.timeout)
         else:
             r = self.session.get(url, timeout=self.timeout)
-        if r.status_code != 200:
-            raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
-        resp = r.json(object_pairs_hook=self.object_pairs_hook)
-        if type(resp) == list:
-            # In theory, you can get more than one error from a single call
-            # so they are returned as a list.
-            errors = [m["error"] for m in resp if "error" in m]
-            if errors:
-                # In general, though, there will only be one error per call
-                # so we return the type and address of the first one in the
-                # exception, to keep the exception type simple.
-                raise QhueException(
-                    message=",".join(e["description"] for e in errors),
-                    type_id=",".join(str(e["type"]) for e in errors),
-                    address=errors[0]['address']
-                )
-        return resp
+        return self._parse_response(r)
 
     def __getattr__(self, name):
         return self._resource_class(
@@ -100,6 +84,26 @@ class Resource(object):
         """Resource class to create and return from __getattr__/__getitem__"""
         return Resource
 
+    def _parse_response(self, response):
+        if response.status_code != 200:
+            raise QhueException("Received response {c} from {u}".format(
+                c=response.status_code, u=self.url))
+        content = response.json(object_pairs_hook=self.object_pairs_hook)
+        if type(content) == list:
+            # In theory, you can get more than one error from a single call
+            # so they are returned as a list.
+            errors = [m["error"] for m in content if "error" in m]
+            if errors:
+                # In general, though, there will only be one error per call
+                # so we return the type and address of the first one in the
+                # exception, to keep the exception type simple.
+                raise QhueException(
+                    message=",".join(e["description"] for e in errors),
+                    type_id=",".join(str(e["type"]) for e in errors),
+                    address=errors[0]['address']
+                )
+        return content
+
 
 class Resource_APIv2(Resource):
 
@@ -122,6 +126,16 @@ class Resource_APIv2(Resource):
         if post_username_match is not None:
             return post_username_match.group(1)
         return None
+
+    def _parse_response(self, response):
+        content = response.json(object_pairs_hook=self.object_pairs_hook)
+        errors = content.get('errors', [])
+        if response.status_code != 200 or errors:
+            raise QhueException_APIv2(
+                '\n'.join([e['description'] for e in errors]),
+                http_response=response.status_code
+            )
+        return content.get('data', content)
 
 
 def _local_api_url(ip, username=None):
@@ -206,3 +220,13 @@ class QhueException(Exception):
 
     def __str__(self):
         return f'QhueException: {self.type_id} -> {self.message}'
+
+
+class QhueException_APIv2(Exception):
+    def __init__(self, message, http_response=None):
+        self.message = message
+        self.http_response = http_response
+        super().__init__(message)
+
+    def __str__(self):
+        return f'HTTP response code {self.http_response}\n{self.message}'
