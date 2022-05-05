@@ -26,15 +26,15 @@ class Resource(object):
     When you call a Resource, you are making a request to that URL with some
     parameters.
     """
+
+    _api_root = '/api'
+
     def __init__(self, url, session, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
         self.url = url
         self.session = session
-        self.address = url[url.find("/api"):]
+        self.address = url[url.find(self._api_root):]
         # Also find the bit after the username, if there is one
-        self.short_address = None
-        post_username_match = re.search(r"/api/[^/]*(.*)", url)
-        if post_username_match is not None:
-            self.short_address = post_username_match.group(1)
+        self.short_address = self._short_address(url)
         self.timeout = timeout
         self.object_pairs_hook = object_pairs_hook
 
@@ -67,7 +67,7 @@ class Resource(object):
             errors = [m["error"] for m in resp if "error" in m]
             if errors:
                 # In general, though, there will only be one error per call
-                # so we return the type and address of the first one in the 
+                # so we return the type and address of the first one in the
                 # exception, to keep the exception type simple.
                 raise QhueException(
                     message=",".join(e["description"] for e in errors),
@@ -77,7 +77,7 @@ class Resource(object):
         return resp
 
     def __getattr__(self, name):
-        return Resource(
+        return self._resource_class(
             self.url + "/" + str(name),
             self.session,
             timeout=self.timeout,
@@ -89,6 +89,16 @@ class Resource(object):
     def __iter__(self):
         raise TypeError(f"'{type(self)}' object is not iterable")
 
+    def _short_address(self, url):
+        post_username_match = re.search(r"{}/[^/]*(.*)".format(re.escape(self._api_root)), url)
+        if post_username_match is not None:
+            return post_username_match.group(1)
+        return None
+
+    @property
+    def _resource_class(self):
+        """Resource class to create and return from __getattr__/__getitem__"""
+        return Resource
 
 def _local_api_url(ip, username=None):
     if username is None:
