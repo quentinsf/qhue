@@ -10,7 +10,9 @@ from socket import getfqdn
 
 import requests
 
-__all__ = ("Bridge", "QhueException", "create_new_username")
+__all__ = ("Bridge", "QhueException",
+           "Bridge_APIv2", "QhueException_APIv2",
+           "create_new_username")
 
 # default timeout in seconds
 _DEFAULT_TIMEOUT = 5
