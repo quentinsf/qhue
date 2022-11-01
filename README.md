@@ -8,13 +8,13 @@ I wrote it because some of the other (excellent) frameworks out there weren't qu
 
 Philips, to their credit, created a beautiful RESTful API for the Hue system, documented it and made it available from very early on.   If only more manufacturers follwed their example!
 
-You can (and should) read [the full documentation here](http://www.developers.meethue.com/philips-hue-api), but a quick summary is that resources like lights, scenes and so forth each have a URL, that might look like this:
+You can (and should) read [the full Philips documentation here](http://www.developers.meethue.com/philips-hue-api), but a quick summary is that resources such as lights, scenes and so forth each have a URL, which might look like this:
 
     http://[myhub]/api/<username>/lights/1
 
 You can read information about light 1 by doing an HTTP GET of this URL, and modify it by doing an HTTP PUT.
 
-In the `qhue` module we have a Resource class, which represents *something that has a URL*. By calling an instance of this class, you'll make an HTTP request to the hub on that URL.
+In the `qhue` module we have a Resource class, which represents *something that has a URL*. By *calling* an instance of this class, you'll make an HTTP request to the hub on that URL.
 
 It also has a Bridge class, which is a handy starting point for building Resources (and is itself a Resource).  If that seems a bit abstract, don't worry - all will be made clear below.
 
@@ -61,19 +61,24 @@ By requesting most *other* attributes of a Resource object, you will construct a
 ```python
     lights = b.lights   # Creates a new Resource with its own URL
     print(lights.url)    # Should have '/lights' on the end
+```
 
 Or, to show it another way, here's what these look like on my system:
 
+```python
     >>> b.url
     'http://192.168.0.45/api/sQCpOqFjZT2uYlFa2TNKXFbX0RZ6OhBjlYeUo-8F'
     >>> b.lights.url
     'http://192.168.0.45/api/sQCpOqFjZT2uYlFa2TNKXFbX0RZ6OhBjlYeUo-8F/lights'
+```
 
 Now, these Resources are, at this stage, simply *references* to entities on the bridge: they haven't communicated with it yet.  So far, it's just a way of constructing URLs, and you can construct ones which wouldn't actually do anything for you if you tried to use them!
 
+```python
      # Not actually included with my bridge, but I can still get a URL for it:
     >>> b.phaser_bank.url
     'http://192.168.0.45/api/sQCpOqFjZT1uYlFa2TNKXFbX0RZ6OhDjlYeUo-8F/phaser_bank'
+```
 
 To make an actual API call to the bridge, we simply *call* the Resource as if it were a function:
 
@@ -143,8 +148,10 @@ So there are several ways to express the same thing, and you can choose the one 
 
 Here's another example, and instead of lights, we'll use sensors (switches, motion sensors etc). This one-liner will tell you where people are moving about:
 
+```python
     >>> [s['name'] for s in b.sensors().values() if s['state'].get('presence')]
     ["Quentin's study", "Hall", "Kitchen"]
+```
 
 Let's explain that one-liner, by way of revision:
 
@@ -182,7 +189,9 @@ As a more complex example, if you want to set the brightness and colour temperat
 
 The above examples cover most simple cases.
 
-**If you don't have any keyword arguments, the HTTP request will be a GET, and will tell you about the current status.  If you do have keyword arguments, it will become a PUT, and it will change the current status.**
+So to re-emphasise an important point: keyword arguments are very different from positional arguments here:
+
+**If you don't have any keyword arguments, the HTTP request will be a GET, and will ***tell you about*** the current status.  If you do have keyword arguments, it will become a PUT, and it will ***change*** the current status.**
 
 Sometimes, though, you need to specify a POST or a DELETE, and you can do so with the special *http_method* argument, which will override the above rule:
 
