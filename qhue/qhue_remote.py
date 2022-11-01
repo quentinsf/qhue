@@ -70,6 +70,7 @@ class RemoteBridge(Resource):
         """
         # Use an oauth session in place of a standard requests session.
         self.session = OAuth2Session(client_id, token=token)
+        self.session.headers["Content-Type"] = "application/json"
         if token is not None:
             return token
         authorization_url, state = self.session.authorization_url(OAUTH_AUTHORIZE_URL)
