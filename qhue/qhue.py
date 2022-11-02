@@ -10,7 +10,9 @@ from socket import getfqdn
 
 import requests
 
-__all__ = ("Bridge", "QhueException", "create_new_username")
+__all__ = ("Bridge", "QhueException",
+           "Bridge_APIv2", "QhueException_APIv2",
+           "create_new_username")
 
 # default timeout in seconds
 _DEFAULT_TIMEOUT = 5
@@ -26,15 +28,15 @@ class Resource(object):
     When you call a Resource, you are making a request to that URL with some
     parameters.
     """
+
+    _api_root = '/api'
+
     def __init__(self, url, session, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
         self.url = url
         self.session = session
-        self.address = url[url.find("/api"):]
+        self.address = url[url.find(self._api_root):]
         # Also find the bit after the username, if there is one
-        self.short_address = None
-        post_username_match = re.search(r"/api/[^/]*(.*)", url)
-        if post_username_match is not None:
-            self.short_address = post_username_match.group(1)
+        self.short_address = self._short_address(url)
         self.timeout = timeout
         self.object_pairs_hook = object_pairs_hook
 
@@ -58,26 +60,10 @@ class Resource(object):
             r = self.session.delete(url, timeout=self.timeout)
         else:
             r = self.session.get(url, timeout=self.timeout)
-        if r.status_code != 200:
-            raise QhueException("Received response {c} from {u}".format(c=r.status_code, u=url))
-        resp = r.json(object_pairs_hook=self.object_pairs_hook)
-        if type(resp) == list:
-            # In theory, you can get more than one error from a single call
-            # so they are returned as a list.
-            errors = [m["error"] for m in resp if "error" in m]
-            if errors:
-                # In general, though, there will only be one error per call
-                # so we return the type and address of the first one in the 
-                # exception, to keep the exception type simple.
-                raise QhueException(
-                    message=",".join(e["description"] for e in errors),
-                    type_id=",".join(str(e["type"]) for e in errors),
-                    address=errors[0]['address']
-                )
-        return resp
+        return self._parse_response(r)
 
     def __getattr__(self, name):
-        return Resource(
+        return self._resource_class(
             self.url + "/" + str(name),
             self.session,
             timeout=self.timeout,
@@ -88,6 +74,70 @@ class Resource(object):
 
     def __iter__(self):
         raise TypeError(f"'{type(self)}' object is not iterable")
+
+    def _short_address(self, url):
+        post_username_match = re.search(r"{}/[^/]*(.*)".format(re.escape(self._api_root)), url)
+        if post_username_match is not None:
+            return post_username_match.group(1)
+        return None
+
+    @property
+    def _resource_class(self):
+        """Resource class to create and return from __getattr__/__getitem__"""
+        return Resource
+
+    def _parse_response(self, response):
+        if response.status_code != 200:
+            raise QhueException("Received response {c} from {u}".format(
+                c=response.status_code, u=self.url))
+        content = response.json(object_pairs_hook=self.object_pairs_hook)
+        if type(content) == list:
+            # In theory, you can get more than one error from a single call
+            # so they are returned as a list.
+            errors = [m["error"] for m in content if "error" in m]
+            if errors:
+                # In general, though, there will only be one error per call
+                # so we return the type and address of the first one in the
+                # exception, to keep the exception type simple.
+                raise QhueException(
+                    message=",".join(e["description"] for e in errors),
+                    type_id=",".join(str(e["type"]) for e in errors),
+                    address=errors[0]['address']
+                )
+        return content
+
+
+class Resource_APIv2(Resource):
+
+    _api_root = '/clip/v2'
+
+    def __call__(self, *args, **kwargs):
+        # FIXME: Temporarily disable insecure HTTPS warnings until
+        # proper certificate validation is implemented
+        import warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            return super().__call__(*args, **kwargs)
+
+    @property
+    def _resource_class(self):
+        return Resource_APIv2
+
+    def _short_address(self, url):
+        post_username_match = re.search(r"{}(.*)".format(re.escape(self._api_root)), url)
+        if post_username_match is not None:
+            return post_username_match.group(1)
+        return None
+
+    def _parse_response(self, response):
+        content = response.json(object_pairs_hook=self.object_pairs_hook)
+        errors = content.get('errors', [])
+        if response.status_code != 200 or errors:
+            raise QhueException_APIv2(
+                '\n'.join([e['description'] for e in errors]),
+                http_response=response.status_code
+            )
+        return content.get('data', content)
 
 
 def _local_api_url(ip, username=None):
@@ -150,6 +200,18 @@ class Bridge(Resource):
         super().__init__(url, self.session, timeout=timeout, object_pairs_hook=object_pairs_hook)
 
 
+class Bridge_APIv2(Resource_APIv2):
+    def __init__(self, ip, username, timeout=_DEFAULT_TIMEOUT, object_pairs_hook=None):
+        self.ip = ip
+        self.username = username
+        url = f'https://{ip}{self._api_root}'
+        self.session = requests.Session()
+        # FIXME: This does not do proper HTTPS certificate verification yet.
+        self.session.verify = False
+        self.session.headers.update({'hue-application-key': self.username})
+        super().__init__(url, self.session, timeout=timeout, object_pairs_hook=object_pairs_hook)
+
+
 class QhueException(Exception):
     def __init__(self, message, type_id=None, address=None):
         self.message = message
@@ -160,3 +222,13 @@ class QhueException(Exception):
 
     def __str__(self):
         return f'QhueException: {self.type_id} -> {self.message}'
+
+
+class QhueException_APIv2(Exception):
+    def __init__(self, message, http_response=None):
+        self.message = message
+        self.http_response = http_response
+        super().__init__(message)
+
+    def __str__(self):
+        return f'HTTP response code {self.http_response}\n{self.message}'
